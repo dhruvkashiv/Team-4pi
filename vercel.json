@@ -16,10 +16,6 @@
     {
       "source": "/",
       "destination": "/frontend/index.html"
-    },
-    {
-      "source": "/((?!api|static).*)/?",
-      "destination": "/frontend/index.html"
     }
   ]
 }
