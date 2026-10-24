@@ -1,78 +1,61 @@
 # Hostlur — Hostel Life, Simplified.
 
-An AI-assisted hostel complaint management platform built for college students and hostel wardens. Hostlur centralizes problem reporting across Wi-Fi, water supply, electricity, food quality, cleanliness, maintenance, and safety, eliminating chaotic WhatsApp threads and lost paper logbooks.
+An AI-assisted hostel complaint management and resident living platform built for college students and hostel wardens. Hostlur centralizes problem reporting across Wi-Fi, water supply, electricity, food quality, cleanliness, maintenance, and safety, eliminating chaotic WhatsApp threads and lost paper logbooks.
 
-The application features official integration with Google's **Gemma** open-weights model (`gemma-4-26b-a4b-it`) via the **Google AI Studio API** for natural-language complaint triage, while maintaining 100% operational availability through deterministic fallback resilience.
+The application features official integration with Google's **Gemma 4** open-weights model (`gemma-4-26b-a4b-it`) via the **Google AI Studio API** for multimodal text-and-image complaint triage, while maintaining 100% operational availability through deterministic fallback resilience.
 
 ---
 
 ## 🌟 Key Features
 
-### 🎓 For Students
-- **Report in Under 60 Seconds**: Simple, responsive complaint form with automatic block, location, and issue details.
-- **✨ Auto-Analyze with Gemma AI**: Real-time natural language triage that identifies category, urgency, duration, and extracts a concise factual summary before submission.
-- **Similar Issue Discovery & Upvoting**: Discovers existing open complaints in the student's block and allows 1-click **+1 Support** to amplify recurring issues rather than creating duplicates.
-- **Real-Time Status Tracking**: Follow tickets through `Submitted` → `Under Review` → `In Progress` → `Resolved` with full technician notes.
+### 🤝 1. Dual Resolution Verification
+A complaint is only marked fully **Resolved** after **BOTH** the warden and the student verify the resolution:
+1. **Warden Inspection:** Warden marks repairs complete → status becomes `Pending Student Confirmation`.
+2. **Student Verification:** Student inspects the repair and can either:
+   - **Confirm Resolution:** Rates satisfaction (1–5 stars) and leaves feedback → ticket closes as `Resolved`.
+   - **Reject / Reopen:** If the faucet still drips or Wi-Fi drops, student explains the persistence → ticket escalates to `Reopened`.
 
-### 🛡️ For Hostel Wardens & Administrators
-- **Real-Time Operational Triage**: Live metrics on total open complaints, urgent hazards, in-progress tasks, and resolved issues.
-- **🚨 Deterministic Safety Hazard Detection**: Instant safety alerts for high-risk hazards (sparks, burning, short circuits, gas leaks, structural cracks) overriding AI suggestions with mandatory human inspection flags.
-- **Role-Restricted Status Management**: Server-side authorized status and confirmed priority updates with a permanent, timestamped audit history.
-- **Comprehensive Filtering**: Search and filter by hostel block, issue category, urgency level, and resolution status.
+### 🎨 2. Black & Yellow Brand Design & Dark/Light Mode
+- High-contrast, premium startup aesthetic using deep carbon blacks, warm slate tones, and vibrant golden yellow accents (`#F5CB5C`).
+- Seamless **Dark / Light theme toggle** with persistent state across browser sessions.
+- Modern SVG Hostlur logo monogram integrated throughout the navbar, landing page, and modals.
+
+### 📸 3. Image Upload + Gemma 4 Multimodal Vision
+- Students can attach photos of leaks, broken furniture, sparking switchboards, or maintenance defects.
+- Server-side integration with **Gemma 4** (`gemma-4-26b-a4b-it`) analyzes visual evidence and complaint text simultaneously, extracting category, location, duration, and urgency.
+- Offline resilience: If AI is unreachable or times out, complaints and images are still saved and categorized via deterministic heuristics.
+
+### 🛡️ 4. Role-Based Login & Student Management
+- Separate **Student Login** and **Warden Login** flows with secure PBKDF2-HMAC-SHA256 password hashing.
+- Authorized wardens can register student accounts, allocate rooms/floors, and securely reset resident passwords.
+
+### 🍛 5. Mess Timings & 7-Day Rotating Menu
+- Daily meal timings (Breakfast, Lunch, Snacks, Dinner).
+- Complete 7-day weekly mess menu with nutritious rotation and chef's special notes.
+
+### 🚪 6. Curfew Hours, Announcements & Verified Contacts
+- Official campus gate closing and curfew timings (weekday vs weekend).
+- Active announcements board from the Warden Office.
+- Verified directory for Chief Warden, Wing Caretakers, 24/7 Emergency Helpline, and Campus Ambulance.
+
+### ⚡ 7. Student Profile Auto-Fill
+- Automatically populates the student's Hostel Block, Floor, and Room on the complaint form with 1-click override for common areas.
+
+### 📖 8. In-App User Manual
+- Interactive walkthrough explaining every button, workflow, and protocol.
 
 ---
 
 ## 🏗️ Technology Stack
 
 | Component | Technology | Description |
-|-----------|------------|-------------|
-| **Backend** | Python 3.14 + FastAPI | High-performance asynchronous REST API with Pydantic v2 validation |
+|---|---|---|
+| **Backend** | Python 3.14 + FastAPI | High-performance asynchronous REST API with Pydantic v2 schemas |
 | **Server** | Uvicorn (ASGI) | Production-ready ASGI server |
 | **Database** | SQLite with WAL Mode | Relational database with foreign keys, indexes, timeline tracking, and supporters table |
-| **AI Integration** | Google AI Studio API | Direct integration with `gemma-4-26b-a4b-it` |
-| **Frontend** | Vanilla ES6+ & HTML5 | Lightweight, lightning-fast Single-Page Application (SPA) |
-| **Design System** | Custom CSS3 Variables | Brand palette: Alabaster Grey, Soft Linen, Tuscan Sun, Carbon Black, Graphite |
-
----
-
-## 🎨 Brand Design System
-
-Hostlur uses a student-focused, warm, and sophisticated color palette:
-
-- **Alabaster Grey** (`#CFDBD5`): Page background
-- **Soft Linen** (`#E8EDDF`): Main content canvas and cards
-- **Tuscan Sun** (`#F5CB5C`): Primary highlights and action buttons
-- **Carbon Black** (`#242423`): High-contrast typography and headings
-- **Graphite** (`#333533`): Secondary text
-- **Warm White** (`#FFFFFF`): Dashboard panels and form inputs
-- **Soft Lavender** (`#DCD2F5`): Gemma AI suggestion badges and callouts
-- **Soft Green** (`#D5E8D8`): Resolved status badges
-- **Soft Coral** (`#F5D3CF` / `#900C05`): Urgent hazards
-
----
-
-## 🧠 Google Gemma 4 Model Integration
-
-Hostlur connects to the official Google AI Studio API:
-
-```
-POST https://generativelanguage.googleapis.com/v1beta/models/gemma-4-26b-a4b-it:generateContent?key={GOOGLE_AI_API_KEY}
-```
-
-### 1. Robust Output & Thought Filtering
-Gemma 4 models utilize internal chain-of-thought tokens (`"thought": true`). Hostlur's dedicated `backend/ai_service.py` filters non-thought candidate response parts, extracts JSON from code fences, and validates against strict Pydantic schemas.
-
-### 2. Deterministic Safety & Hazard Rules
-Language models are never solely relied upon for emergencies. Hostlur scans complaint text for critical hazard keywords (e.g. `spark`, `smoke`, `burning`, `short circuit`, `live wire`, `gas leak`). If detected:
-- Priority is automatically elevated to **Urgent**.
-- The record is flagged with `is_hazard = True`.
-- An alert is highlighted on the warden dashboard for immediate manual intervention.
-
-### 3. Graceful Fallback (AI-Independent Core)
-Even if the Google AI API key is missing, network is offline, or rate limits occur:
-- Complaint submission and persistence **never fail**.
-- A deterministic rule-based heuristic automatically categorizes the issue and generates safe defaults.
-- The complaint enters the normal resolution lifecycle seamlessly.
+| **AI Integration** | Google AI Studio API | Multimodal vision & text analysis with `gemma-4-26b-a4b-it` |
+| **Frontend** | Vanilla ES6+ & HTML5 | Lightning-fast Single-Page Application (SPA) |
+| **Design System** | Custom CSS3 Variables | Black & Yellow theme with Dark/Light mode support |
 
 ---
 
@@ -95,12 +78,12 @@ pip install -r requirements.txt
 ```
 
 ### Step 3: Configure Environment Variables
-Copy the example environment configuration:
+Copy `.env.example`:
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` to configure your Google AI Studio credentials:
+Configure your credentials in `.env`:
 ```env
 HOST=127.0.0.1
 PORT=8000
@@ -114,20 +97,18 @@ GEMMA_MODEL=gemma-4-26b-a4b-it
 DATABASE_URL=sqlite:///./hostlur.db
 ```
 
-> **Security Note:** `.env` is ignored by Git in `.gitignore`. Never commit API keys to version control.
-
 ### Step 4: Run the Application
 ```bash
 source .venv/bin/activate
 PYTHONPATH=. uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Open your browser and navigate to:
+Open your browser at:
 ```
 http://127.0.0.1:8000
 ```
 
-Interactive OpenAPI Swagger documentation is available at:
+OpenAPI Swagger documentation:
 ```
 http://127.0.0.1:8000/docs
 ```
@@ -136,44 +117,31 @@ http://127.0.0.1:8000/docs
 
 ## 🧪 Testing
 
-Run the automated test suite verifying all 9 core subsystems:
+Run the automated test suite verifying all 7 core subsystems:
 ```bash
 source .venv/bin/activate
 PYTHONPATH=. python backend/test_backend.py
 ```
 
 ### Test Coverage Summary:
-- ✅ Health check & API metadata
-- ✅ Role-based session authentication (`student` vs `warden`)
-- ✅ Real database metrics computation
-- ✅ Complaint persistence and timeline initialization
-- ✅ Duplicate / related issue matching
-- ✅ +1 Support / upvoting toggle
-- ✅ Warden authorization enforcement (HTTP 403 when students attempt privileged status changes)
-- ✅ Deterministic emergency hazard detection
-- ✅ Graceful AI fallback resilience
+- ✅ Health check & API metadata (v2.0.0)
+- ✅ Student & Warden role login with PBKDF2 password authentication
+- ✅ Warden student account creation & password reset
+- ✅ Dual resolution verification (Pending confirmation → Reopen or 5-star Close)
+- ✅ Verified contacts, Mess timings, 7-day Mess menu, and Curfew rules
+- ✅ Deterministic emergency safety hazard detection
 
 ---
 
-## 🎯 Hackathon Demonstration Guide
+## 🎯 Demo Credentials for Hackathon Evaluators
 
-Hostlur includes a built-in **Demo Role Switcher** in the top navigation bar:
+| Persona | Role | Email | Password | Scope |
+|---|---|---|---|---|
+| **Aarav Sharma** | Student | `aarav@campus.edu` | `student123` | Block B (Boys), Room B-302 |
+| **Priya Patel** | Student | `priya@campus.edu` | `student123` | Block C (Girls), Room C-204 |
+| **Dr. R. K. Sharma** | Warden | `warden.sharma@campus.edu` | `warden123` | Campus-Wide Administration |
 
-1. **Student Persona (Aarav Sharma - Block B)**:
-   - View your existing complaints and live counts.
-   - Click **+ Report Issue**.
-   - Type a natural-language description: *"The Wi-Fi in the 3rd floor west corridor has been dropping constantly since morning."*
-   - Click **✨ Auto-Analyze with Gemma AI** to observe real-time AI classification and priority assignment.
-   - Submit the issue and watch it appear in the dashboard feed.
-2. **Safety Hazard Demo**:
-   - Submit a complaint with text: *"The bathroom geyser switch is sparking and water is dripping on the socket!"*
-   - Observe the instant **🚨 Safety Hazard Alert** and automatic Urgent priority assignment.
-3. **Warden Persona (Dr. R. K. Sharma)**:
-   - Switch persona to **🛡️ Warden: Dr. Sharma**.
-   - Open the **Hostel Warden Portal**.
-   - View the highlighted urgent hazard ticket.
-   - Click **Manage & Update →**, change status to `In Progress`, add a note *"Electrician dispatched"*, and save.
-   - Notice the updated status reflected in the complaint timeline.
+*(Use the **1-Click Auto Fill** button in the Sign In modal or the **Demo Role** dropdown in the top navbar).*
 
 ---
 

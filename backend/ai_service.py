@@ -1,7 +1,7 @@
 import re
 import json
 import logging
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict, Any
 import httpx
 
 from backend.config import (
@@ -23,75 +23,113 @@ def detect_hazards(text: str) -> Tuple[bool, Optional[str]]:
             return True, f"Emergency safety rule triggered: '{kw}' detected in complaint description."
     return False, None
 
-def heuristic_fallback_analysis(text: str, hostel_block: Optional[str] = None, location: Optional[str] = None) -> AIAnalysisResult:
-    """Deterministic fallback if AI service is offline, timed out, or unavailable."""
+def heuristic_fallback_analysis(
+    text: str,
+    hostel_block: Optional[str] = None,
+    location: Optional[str] = None,
+    had_image: bool = False
+) -> AIAnalysisResult:
+    """
+    Deterministic rule-based fallback if the AI vision service is offline or unreachable.
+    Uses strict word boundaries to avoid false positives (e.g. 'attached' matching 'ac').
+    Defaults to 'Other / Unclear' with human review flag if no pattern matches.
+    """
     lowered = text.lower()
     is_hazard, hazard_reason = detect_hazards(text)
 
-    # Determine category via keyword heuristics
-    category = "Other"
-    if any(k in lowered for k in ["wifi", "wi-fi", "internet", "router", "lan", "net", "slow net", "ping"]):
-        category = "Wi-Fi and Internet"
-    elif any(k in lowered for k in ["water", "geyser", "tap", "shower", "pipe", "leak", "flush", "drain"]):
-        category = "Water Supply"
-    elif any(k in lowered for k in ["light", "fan", "electricity", "socket", "switch", "power", "bulb", "tube", "ac"]):
-        category = "Electricity"
-    elif any(k in lowered for k in ["food", "mess", "canteen", "lunch", "dinner", "breakfast", "meal"]):
-        category = "Food Quality"
-    elif any(k in lowered for k in ["clean", "dirt", "garbage", "trash", "dustbin", "smell", "odor", "bathroom"]):
-        category = "Cleanliness"
-    elif any(k in lowered for k in ["door", "lock", "window", "bed", "chair", "table", "cupboard", "latch"]):
-        category = "Maintenance"
-    elif any(k in lowered for k in ["theft", "stolen", "harassment", "guard", "security", "gate"]):
-        category = "Safety"
+    # Use strict regex with word boundaries
+    category = "Other / Unclear"
+    subcategory = "Unspecified issue"
+    evidence = []
 
-    # Determine priority
+    if re.search(r"\b(wifi|wi-fi|internet|router|lan|ethernet|network|signal|ping)\b", lowered):
+        category = "Internet & Networking"
+        subcategory = "Network equipment or Wi-Fi outage"
+        evidence.append("Keywords referencing networking/internet connectivity.")
+    elif re.search(r"\b(water|pipe|leak|tap|faucet|geyser|drain|flush|shower|overflow|plumbing)\b", lowered):
+        category = "Plumbing & Water Supply"
+        subcategory = "Plumbing fixture or water leakage"
+        evidence.append("Keywords referencing plumbing fixtures or water leakage.")
+    elif re.search(r"\b(toilet|washroom|commode|urinal|washbasin|sanitation)\b", lowered):
+        category = "Washroom & Sanitation"
+        subcategory = "Sanitary fixture issue"
+        evidence.append("Keywords referencing washroom sanitation.")
+    elif re.search(r"\b(light|fan|bulb|tube|socket|switch|short circuit|power|spark|wire|wiring|fuse|\bac\b|air conditioner)\b", lowered):
+        category = "Electricity & Lighting"
+        subcategory = "Electrical fixture or wiring defect"
+        evidence.append("Keywords referencing electrical components or lighting.")
+    elif re.search(r"\b(food|mess|canteen|lunch|dinner|breakfast|meal|caterer)\b", lowered):
+        category = "Mess & Food"
+        subcategory = "Dining or food quality concern"
+        evidence.append("Keywords referencing hostel food or mess facilities.")
+    elif re.search(r"\b(clean|dirt|dust|garbage|trash|bin|smell|odor|pest|cockroach|insects)\b", lowered):
+        category = "Cleaning & Hygiene"
+        subcategory = "Cleaning or waste disposal"
+        evidence.append("Keywords referencing hygiene or cleaning.")
+    elif re.search(r"\b(chair|desk|bed|table|cupboard|almirah|mattress|wardrobe)\b", lowered):
+        category = "Furniture & Fixtures"
+        subcategory = "Room furniture damage"
+        evidence.append("Keywords referencing hostel furniture.")
+    elif re.search(r"\b(wall|ceiling|floor|door|window|crack|seepage|hinge|latch|plaster|concrete)\b", lowered):
+        category = "Civil & Structural Damage"
+        subcategory = "Civil structural defect"
+        evidence.append("Keywords referencing building structure or carpentry.")
+    elif re.search(r"\b(theft|stolen|guard|security|lock|harassment|gate)\b", lowered):
+        category = "Safety & Security"
+        subcategory = "Security or access control"
+        evidence.append("Keywords referencing hostel security.")
+
     if is_hazard:
         priority = "Urgent"
-    elif any(k in lowered for k in ["urgent", "immediately", "exam", "cannot study", "no water", "blackout", "overflow"]):
+    elif any(k in lowered for k in ["urgent", "immediately", "exam", "cannot study", "no water", "blackout"]):
         priority = "High"
-    elif any(k in lowered for k in ["slow", "sometimes", "mild", "noisy", "creaking"]):
+    elif any(k in lowered for k in ["slow", "mild", "noisy", "squeaking"]):
         priority = "Low"
     else:
         priority = "Medium"
 
-    # Generate summary
     clean_text = text.strip().replace("\n", " ")
-    summary = clean_text[:110] + "..." if len(clean_text) > 110 else clean_text
-
-    missing = []
-    if not location and not any(k in lowered for k in ["room", "floor", "washroom", "corridor", "bathroom", "wing"]):
-        missing.append("Specific room or floor location")
+    if not clean_text or clean_text == "Please inspect attached image":
+        summary = f"{category} reported. Manual inspection recommended."
+    else:
+        summary = clean_text[:110] + "..." if len(clean_text) > 110 else clean_text
 
     return AIAnalysisResult(
         category=category,
-        location=location or ("Detected in text" if "floor" in lowered or "room" in lowered else None),
-        duration="Recent" if "since" in lowered or "today" in lowered else None,
+        subcategory=subcategory,
+        description=summary,
+        visual_evidence=evidence if evidence else ["Fallback heuristic based on text."],
+        confidence=0.60 if category != "Other / Unclear" else 0.30,
+        needs_human_review=True,
         suggested_priority=priority,
         summary=summary,
-        missing_information=missing,
+        location=location,
+        duration="Recent",
+        missing_information=[],
         is_hazard=is_hazard,
         hazard_reason=hazard_reason,
-        ai_status="fallback"
+        ai_status="fallback",
+        image_analyzed=had_image
     )
 
 async def analyze_complaint_with_gemma(
-    description: str,
+    description: str = "",
     hostel_block: Optional[str] = None,
-    location: Optional[str] = None
+    location: Optional[str] = None,
+    image_data: Optional[str] = None
 ) -> AIAnalysisResult:
     """
-    Calls Google AI Studio API using the configured Gemma model.
-    Extracts category, priority, concise summary, and checks for hazards.
-    Falls back gracefully to deterministic rule-based analysis on any error.
+    Calls Google AI Studio API using Gemma 4 (gemma-4-26b-a4b-it).
+    Performs multimodal vision classification against the 10 authoritative hostel categories.
+    Returns a strict structured JSON result matching the required schema.
     """
-    # 1. Deterministic safety check
+    has_image = bool(image_data and len(image_data) > 50)
     is_hazard, hazard_reason = detect_hazards(f"{description} {location or ''}")
 
     # If no API key configured, use fallback immediately
     if not GOOGLE_AI_API_KEY:
         logger.warning("GOOGLE_AI_API_KEY not configured. Using deterministic fallback.")
-        res = heuristic_fallback_analysis(description, hostel_block, location)
+        res = heuristic_fallback_analysis(description, hostel_block, location, has_image)
         if is_hazard:
             res.is_hazard = True
             res.hazard_reason = hazard_reason
@@ -100,46 +138,82 @@ async def analyze_complaint_with_gemma(
 
     endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMMA_MODEL}:generateContent?key={GOOGLE_AI_API_KEY}"
 
-    categories_str = ", ".join(ALLOWED_CATEGORIES)
-    priorities_str = ", ".join(ALLOWED_PRIORITIES)
+    categories_formatted = "\n".join([f"{i+1}. {cat}" for i, cat in enumerate(ALLOWED_CATEGORIES)])
 
-    prompt = f"""You are Hostlur AI, an intelligent assistant for a college hostel complaint portal.
-A student has reported the following problem:
-"{description}"
+    prompt = f"""You are an expert AI facilities inspector for Hostlur, a university hostel management system.
+Inspect the attached image and student complaint text:
+Student text: "{description if description else 'Please inspect the attached photo'}"
 Hostel Block: {hostel_block or 'Not specified'}
 Location: {location or 'Not specified'}
 
-Analyze the complaint and reply STRICTLY with a single valid JSON object.
-Allowed categories: [{categories_str}]
-Allowed priorities: [{priorities_str}]
+TASK:
+1. Examine the visual evidence in the image and text.
+2. Classify the problem into EXACTLY ONE of the following 10 approved categories:
+{categories_formatted}
 
-Required JSON structure:
+3. Return STRICTLY a JSON object with this schema (do not include explanations outside the JSON):
+```json
 {{
-  "category": "Choose exactly one from the allowed categories list",
-  "location": "Specific location mentioned (e.g. 3rd floor, Room 302) or null",
-  "duration": "Duration stated (e.g. since morning, 2 days) or null",
-  "suggested_priority": "One of: Low, Medium, High, Urgent",
-  "summary": "Factual 1-sentence summary under 120 characters",
-  "missing_information": ["List any key missing details that would help the warden resolve this faster"]
-}}"""
+  "category": "Exact name from the 10 approved categories",
+  "subcategory": "Specific item or component affected (e.g. Leaking faucet, Damaged socket, Broken chair)",
+  "description": "Factual 1-sentence description of the visible defect",
+  "visual_evidence": [
+    "Specific visual clue 1 observed in image",
+    "Specific visual clue 2 observed in image"
+  ],
+  "confidence": 0.95,
+  "needs_human_review": false,
+  "suggested_priority": "Low, Medium, High, or Urgent"
+}}
+```
+
+Rules:
+- If the image is blurry, irrelevant, or lacks visual evidence, set category to "Other / Unclear" and needs_human_review to true.
+- Do NOT guess Electricity unless there is actual visible electrical equipment (switch, socket, wire, light fixture, breaker).
+- Water taps, pipes, or geyser water leaks must be classified as "Plumbing & Water Supply".
+- Broken chairs, tables, or beds must be classified as "Furniture & Fixtures".
+- Wall cracks, ceiling seepage, or broken doors must be classified as "Civil & Structural Damage".
+- Output only valid JSON.
+"""
+
+    parts = [{"text": prompt}]
+
+    # Multimodal image attachment
+    if has_image:
+        try:
+            mime_type = "image/jpeg"
+            clean_b64 = image_data
+            if image_data.startswith("data:"):
+                header, clean_b64 = image_data.split(",", 1)
+                if "png" in header:
+                    mime_type = "image/png"
+                elif "webp" in header:
+                    mime_type = "image/webp"
+
+            parts.append({
+                "inline_data": {
+                    "mime_type": mime_type,
+                    "data": clean_b64
+                }
+            })
+        except Exception as img_err:
+            logger.warning(f"Failed to prepare image part for Gemma 4: {img_err}")
 
     payload = {
         "contents": [
             {
-                "parts": [
-                    {"text": prompt}
-                ]
+                "parts": parts
             }
         ]
     }
 
     try:
-        async with httpx.AsyncClient(timeout=20.0) as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             resp = await client.post(endpoint, json=payload)
 
         if resp.status_code != 200:
-            logger.error(f"Gemma API returned HTTP {resp.status_code}: {resp.text[:200]}")
-            fallback = heuristic_fallback_analysis(description, hostel_block, location)
+            logger.error(f"Gemma API returned HTTP {resp.status_code}: {resp.text[:300]}")
+            fallback = heuristic_fallback_analysis(description, hostel_block, location, has_image)
             if is_hazard:
                 fallback.is_hazard = True
                 fallback.hazard_reason = hazard_reason
@@ -151,32 +225,34 @@ Required JSON structure:
         if not candidates:
             raise ValueError("No candidates returned from Gemma API")
 
-        parts = candidates[0].get("content", {}).get("parts", [])
-        # Gemma 4 marks chain-of-thought with 'thought: true'. Extract non-thought parts.
+        parts_out = candidates[0].get("content", {}).get("parts", [])
+        
+        # Look specifically for non-thought parts or the last part containing JSON
         response_text = ""
-        for p in parts:
+        for p in parts_out:
             if not p.get("thought", False) and "text" in p:
                 response_text += p["text"]
 
-        if not response_text and parts:
-            response_text = parts[-1].get("text", "")
+        if not response_text and parts_out:
+            response_text = parts_out[-1].get("text", "")
 
-        # Extract JSON from markdown fence or raw text
+        # Extract JSON block
         json_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", response_text, re.DOTALL)
         if json_match:
             raw_json = json_match.group(1)
         else:
-            json_match = re.search(r"(\{.*\})", response_text, re.DOTALL)
+            # Non-greedy search for JSON object
+            json_match = re.search(r"(\{\s*\"category\".*?\})", response_text, re.DOTALL)
             raw_json = json_match.group(1) if json_match else response_text
 
         parsed = json.loads(raw_json)
 
-        # Validate category
-        raw_cat = parsed.get("category", "Other")
-        category = "Other"
+        # Validate category against the 10 approved categories
+        raw_cat = parsed.get("category", "").strip()
+        matched_cat = "Other / Unclear"
         for allowed in ALLOWED_CATEGORIES:
-            if allowed.lower() in raw_cat.lower() or raw_cat.lower() in allowed.lower():
-                category = allowed
+            if allowed.lower() == raw_cat.lower() or allowed.lower() in raw_cat.lower():
+                matched_cat = allowed
                 break
 
         # Validate priority
@@ -187,33 +263,40 @@ Required JSON structure:
                 priority = allowed_p
                 break
 
-        # Override priority if deterministic hazard was found
         if is_hazard:
             priority = "Urgent"
 
-        missing_info = parsed.get("missing_information", [])
-        if not isinstance(missing_info, list):
-            missing_info = []
+        subcategory = parsed.get("subcategory", "General defect")
+        desc_text = parsed.get("description", description if description else "Issue inspected via visual evidence.")
+        evidence = parsed.get("visual_evidence", [])
+        if not isinstance(evidence, list):
+            evidence = [str(evidence)]
 
-        summary = parsed.get("summary", description[:100]).strip()
-        extracted_location = parsed.get("location") or location
-        duration = parsed.get("duration")
+        confidence_val = float(parsed.get("confidence", 0.85))
+        confidence_val = max(0.0, min(1.0, confidence_val))
+        needs_review = bool(parsed.get("needs_human_review", False))
 
         return AIAnalysisResult(
-            category=category,
-            location=extracted_location,
-            duration=duration,
+            category=matched_cat,
+            subcategory=subcategory,
+            description=desc_text,
+            visual_evidence=evidence,
+            confidence=confidence_val,
+            needs_human_review=needs_review or (matched_cat == "Other / Unclear"),
             suggested_priority=priority,
-            summary=summary,
-            missing_information=missing_info,
+            summary=desc_text,
+            location=location,
+            duration=None,
+            missing_information=[],
             is_hazard=is_hazard,
             hazard_reason=hazard_reason,
-            ai_status="success"
+            ai_status="success",
+            image_analyzed=has_image
         )
 
     except Exception as exc:
         logger.error(f"Error calling or parsing Gemma API: {str(exc)}")
-        fallback = heuristic_fallback_analysis(description, hostel_block, location)
+        fallback = heuristic_fallback_analysis(description, hostel_block, location, has_image)
         if is_hazard:
             fallback.is_hazard = True
             fallback.hazard_reason = hazard_reason

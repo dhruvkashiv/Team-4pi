@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hostlur — Hostel Life, Simplified.</title>
-  <meta name="description" content="AI-assisted hostel complaint management platform powered by Google's Gemma model.">
+  <meta name="description" content="AI-assisted hostel complaint management platform powered by Google's Gemma 4 model with dual resolution verification.">
 
-  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="/static/css/styles.css">
@@ -19,228 +19,293 @@
   <!-- Navigation Bar -->
   <header class="navbar">
     <div class="nav-container">
-      <a href="#" class="brand-logo" data-view-nav="landing">
-        <div class="brand-icon">H</div>
-        <span>Hostlur</span>
+      <!-- Hostlur Logo -->
+      <a href="#" class="brand-link" id="brand-logo-link">
+        <svg class="brand-logo-svg" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="12" fill="#181E28" stroke="#F5CB5C" stroke-width="2"/>
+          <path d="M12 36V14L24 6L36 14V36" stroke="#F5CB5C" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M18 24H30" stroke="#F5CB5C" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="24" cy="18" r="3" fill="#F5CB5C"/>
+          <path d="M24 21V27" stroke="#F5CB5C" stroke-width="2"/>
+        </svg>
+        <div class="brand-wordmark">
+          <div class="brand-title">HOST<span>LUR</span></div>
+          <div class="brand-tagline">Hostel Life, Simplified.</div>
+        </div>
       </a>
 
-      <nav>
-        <ul class="nav-links">
-          <li><button class="nav-link active" data-view="landing" data-view-nav="landing">Home</button></li>
-          <li><a href="#features" class="nav-link" data-view-nav="landing">Features</a></li>
-          <li><a href="#how-it-works" class="nav-link" data-view-nav="landing">How It Works</a></li>
-          <li><button class="nav-link" id="nav-warden-link" data-view="warden" data-view-nav="warden">For Wardens</button></li>
-          <li><button class="nav-link" id="nav-student-link" data-view="student" data-view-nav="student">Student Portal</button></li>
+      <!-- Navigation Links (Protected - shown only when authenticated) -->
+      <nav id="nav-menu-wrap" style="display: none;">
+        <ul class="nav-menu">
+          <li><button class="nav-item-btn" id="nav-student-btn" data-view="student" data-view-nav="student">My Complaints</button></li>
+          <li><button class="nav-item-btn" id="nav-warden-btn" data-view="warden" data-view-nav="warden">Warden Triage</button></li>
+          <li><button class="nav-item-btn" id="nav-report-btn" data-view="newComplaint" data-view-nav="newComplaint">+ Report Issue</button></li>
+          <li><button class="nav-item-btn" data-view="mess" data-view-nav="mess">Mess & Dining</button></li>
+          <li><button class="nav-item-btn" data-view="curfew" data-view-nav="curfew">Curfew & Contacts</button></li>
+          <li><button class="nav-item-btn" data-view="manual" data-view-nav="manual">📖 Manual</button></li>
         </ul>
       </nav>
 
-      <div class="nav-actions">
-        <!-- Persona Quick-Switch -->
-        <div class="persona-selector" title="Switch Demo Persona for Hackathon Evaluation">
-          <label for="user-switcher-select" style="font-size: 0.75rem; color: var(--color-text-secondary);">Demo Role:</label>
-          <select id="user-switcher-select" class="persona-select">
-            <option value="student-aarav">🎓 Student: Aarav</option>
-            <option value="student-priya">🎓 Student: Priya</option>
-            <option value="warden-sharma">🛡️ Warden: Dr. Sharma</option>
-          </select>
-        </div>
-
-        <button class="btn btn-primary btn-sm" data-view-nav="newComplaint">
-          + Report Issue
+      <!-- Right Header Actions -->
+      <div class="nav-right-actions">
+        <!-- Theme Toggle Button -->
+        <button id="btn-theme-toggle" class="btn-theme-toggle" title="Toggle Dark/Light Mode" onclick="toggleTheme()">
+          ☀️
         </button>
+
+        <!-- Authenticated User Block (Hidden when unauthenticated) -->
+        <div id="nav-auth-user-block" style="display: none; align-items: center; gap: 0.8rem;">
+          <div class="user-account-badge">
+            <span id="nav-user-role" class="role-pill role-student">Student</span>
+            <span id="nav-user-name" style="font-weight: 700;">Aarav</span>
+            <select id="persona-switcher-select" class="select-filter" style="padding: 0.15rem 0.4rem; font-size: 0.78rem; border-radius: 6px; border: none; background: transparent;">
+              <!-- Populated via JavaScript -->
+            </select>
+          </div>
+
+          <!-- Sign Out Button -->
+          <button id="nav-logout-btn" class="btn btn-secondary btn-sm" onclick="handleLogout()" style="color: var(--color-urgent); border-color: var(--color-urgent-border);">
+            Sign Out ↪
+          </button>
+        </div>
       </div>
     </div>
   </header>
 
   <main>
-    <!-- ================= VIEW 1: LANDING PAGE ================= -->
-    <div id="view-landing">
-      <!-- Hero Section -->
-      <section class="hero-section">
-        <div class="canvas-container">
-          <div class="eyebrow">
-            ⚡ AI-POWERED HOSTEL COMPLAINT MANAGEMENT
-          </div>
-          
-          <h1 class="hero-headline">
-            Hostel life,<br>
-            <span class="hero-highlight">sorted.</span>
-          </h1>
+    <!-- ================= VIEW 1: AUTHENTICATION LANDING (FIRST SCREEN) ================= -->
+    <div id="view-auth" class="auth-landing-wrap">
+      <div class="hero-glow-orb"></div>
+      
+      <!-- STEP 1: PORTAL SELECTION -->
+      <div id="auth-portal-selection" style="width: 100%; max-width: 860px; margin: 0 auto;">
+        <div class="eyebrow-badge">
+          ⚡ HOSTLUR SECURE CAMPUS ACCESS
+        </div>
+        
+        <h1 class="hero-title" style="margin-top: 0.5rem;">
+          Hostel life, <span class="text-yellow">simplified.</span>
+        </h1>
+        
+        <p class="hero-lead-text" style="max-width: 600px; margin: 0 auto 1.5rem;">
+          AI-assisted complaint resolution powered by Google's Gemma 4 Vision with dual student-warden verification. Choose your portal to continue:
+        </p>
 
-          <div class="hero-subhead">
-            Report it. Track it. Get it sorted.
-          </div>
-
-          <p class="hero-description">
-            A simple and smart platform to report hostel issues, track every update, and help make campus living better for everyone.
-          </p>
-
-          <div class="hero-cta-group">
-            <button class="btn btn-primary" data-view-nav="newComplaint" style="font-size: 1.05rem; padding: 0.8rem 1.6rem;">
-              Report an Issue →
-            </button>
-            <a href="#how-it-works" class="btn btn-secondary" style="font-size: 1.05rem; padding: 0.8rem 1.6rem;">
-              See How It Works
-            </a>
-          </div>
-
-          <!-- Live Interactive Preview of Student Dashboard -->
-          <div class="preview-window">
-            <div class="preview-topbar">
-              <div class="window-dots">
-                <div class="dot" style="background: #FF5F56;"></div>
-                <div class="dot" style="background: #FFBD2E;"></div>
-                <div class="dot" style="background: #27C93F;"></div>
+        <!-- Two Portal Cards -->
+        <div class="portal-grid">
+          <!-- Student Portal Card -->
+          <div class="portal-card" onclick="showAuthScreen('student')">
+            <div>
+              <div class="portal-card-header">
+                <div class="portal-card-icon">🎓</div>
+                <div>
+                  <h3 style="font-size: 1.4rem; margin-bottom: 0.2rem;">Student Portal</h3>
+                  <span class="status-badge" style="background: var(--color-primary-subtle); color: var(--color-primary); font-size: 0.72rem;">Resident Access</span>
+                </div>
               </div>
-              <span style="font-size: 0.8rem; font-weight: 600; color: var(--color-text-secondary);">Hostlur Live Campus Feed — Block B & C</span>
-              <span class="badge badge-ai" style="font-size: 0.72rem;">Gemma 4 AI Active</span>
+              <p style="color: var(--color-text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                Submit room and hostel issues with photos, track live technician progress, inspect completed repairs, and verify resolution.
+              </p>
             </div>
-            <div class="preview-content">
-              <div id="landing-preview-cards" class="complaints-grid">
-                <!-- Filled dynamically by app.js -->
+            <div>
+              <div class="auth-demo-pill">
+                <span>Demo: <strong>aarav@campus.edu</strong></span>
+                <span>Pass: <code>Student@123</code></span>
               </div>
+              <button type="button" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                Continue as Student →
+              </button>
             </div>
           </div>
-        </div>
-      </section>
 
-      <!-- Features Section -->
-      <section id="features" class="canvas-container" style="padding-top: 4rem;">
-        <div class="section-header">
-          <h2 class="section-title">Why Students & Wardens Love Hostlur</h2>
-          <p class="section-subtitle">Eliminating WhatsApp chaos and lost paper registers forever.</p>
-        </div>
-
-        <div class="features-grid">
-          <div class="feature-card">
-            <div class="feature-icon-box">⚡</div>
-            <h3>1. Report in Seconds</h3>
-            <p>Submit hostel complaints through a clean, intuitive form in under 60 seconds. No waiting in office queues.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-box">📍</div>
-            <h3>2. Track Every Update</h3>
-            <p>Live status transparency from Submitted to In-Progress and Resolved. See who is working on your issue.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-box" style="background: #F3EFFC;">🧠</div>
-            <h3>3. AI-Powered Insights</h3>
-            <p>Google's Gemma model automatically categorizes complaints, evaluates urgency, and generates crisp warden summaries.</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon-box">🛡️</div>
-            <h3>4. Faster Resolution</h3>
-            <p>Helps hostel wardens detect recurring systemic issues across wings, prioritize hazards, and allocate technicians.</p>
+          <!-- Warden Portal Card -->
+          <div class="portal-card" onclick="showAuthScreen('warden')">
+            <div>
+              <div class="portal-card-header">
+                <div class="portal-card-icon">🛡️</div>
+                <div>
+                  <h3 style="font-size: 1.4rem; margin-bottom: 0.2rem;">Warden Portal</h3>
+                  <span class="status-badge" style="background: rgba(192, 132, 252, 0.15); color: var(--color-ai); font-size: 0.72rem;">Administrative Staff</span>
+                </div>
+              </div>
+              <p style="color: var(--color-text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                Review campus triage, assess emergency safety hazards, dispatch technicians, mark work completed, and manage student accounts.
+              </p>
+            </div>
+            <div>
+              <div class="auth-demo-pill">
+                <span>Demo: <strong>warden.sharma@campus.edu</strong></span>
+                <span>Pass: <code>Warden@123</code></span>
+              </div>
+              <button type="button" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                Continue as Warden →
+              </button>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      <!-- How It Works Section -->
-      <section id="how-it-works" class="canvas-container" style="padding-top: 2rem;">
-        <div class="section-header">
-          <h2 class="section-title">How It Works</h2>
-          <p class="section-subtitle">Three straightforward steps to a cleaner, safer hostel.</p>
-        </div>
+      <!-- STEP 2A: STUDENT LOGIN FORM -->
+      <div id="auth-student-login" class="portal-login-box" style="display: none;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="showAuthScreen('selection')" style="margin-bottom: 1.2rem;">
+          ← Back to Portal Selection
+        </button>
 
-        <div class="steps-container">
-          <div class="step-card">
-            <div class="step-num">01</div>
-            <h3>Step 1: Report the problem</h3>
-            <p>Describe your Wi-Fi, electricity, plumbing, or cleanliness issue in plain words with your block and room number.</p>
-          </div>
-
-          <div class="step-card">
-            <div class="step-num">02</div>
-            <h3>Step 2: Hostlur organizes</h3>
-            <p>Gemma AI structure-checks the report, highlights urgent safety flags, and matches with potential related reports.</p>
-          </div>
-
-          <div class="step-card">
-            <div class="step-num">03</div>
-            <h3>Step 3: Track until resolution</h3>
-            <p>The warden acknowledges the ticket, technician dispatches, and you receive instant status confirmation.</p>
+        <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.5rem;">
+          <div style="font-size: 2rem;">🎓</div>
+          <div>
+            <h2 style="font-size: 1.6rem; margin: 0;">Student Sign In</h2>
+            <p style="color: var(--color-text-secondary); font-size: 0.88rem; margin: 0;">Access your personal complaints & verified profile</p>
           </div>
         </div>
 
-        <!-- Callout Banner -->
-        <div class="cta-banner">
-          <h2 style="font-size: 2.2rem; margin-bottom: 0.6rem;">Ready to experience hassle-free hostel living?</h2>
-          <p style="color: var(--color-text-secondary); max-width: 500px; margin: 0 auto 1.8rem;">
-            Join your fellow residents in keeping our campus infrastructure spotless.
-          </p>
-          <button class="btn btn-primary" data-view-nav="newComplaint" style="font-size: 1.05rem; padding: 0.8rem 1.8rem;">
-            Report an Issue Now →
+        <!-- 1-Click Demo Fill -->
+        <button type="button" class="btn btn-secondary btn-sm" onclick="autofillLogin('student')" style="width: 100%; margin: 1.2rem 0; font-size: 0.82rem; border-style: dashed;">
+          ⚡ Auto-Fill Demo Student (Aarav Sharma)
+        </button>
+
+        <div id="student-login-error" class="auth-error-box"></div>
+
+        <form id="student-login-form">
+          <div class="form-control-block" style="margin-bottom: 1rem;">
+            <label for="student-login-email">Campus Email or Student ID *</label>
+            <input type="text" id="student-login-email" class="input-field" placeholder="e.g. aarav@campus.edu or student-aarav" required>
+          </div>
+
+          <div class="form-control-block" style="margin-bottom: 1.5rem;">
+            <label for="student-login-pwd">Password *</label>
+            <div class="pwd-input-wrap">
+              <input type="password" id="student-login-pwd" class="input-field" placeholder="Enter password" required>
+              <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('student-login-pwd', this)" title="Show/Hide Password">
+                👁️
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="student-login-btn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.8rem;">
+            Sign In as Student →
           </button>
+        </form>
+      </div>
+
+      <!-- STEP 2B: WARDEN LOGIN FORM -->
+      <div id="auth-warden-login" class="portal-login-box" style="display: none;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="showAuthScreen('selection')" style="margin-bottom: 1.2rem;">
+          ← Back to Portal Selection
+        </button>
+
+        <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.5rem;">
+          <div style="font-size: 2rem;">🛡️</div>
+          <div>
+            <h2 style="font-size: 1.6rem; margin: 0;">Hostel Warden Sign In</h2>
+            <p style="color: var(--color-text-secondary); font-size: 0.88rem; margin: 0;">Administrative triage, technician dispatch & student directory</p>
+          </div>
         </div>
-      </section>
+
+        <!-- 1-Click Demo Fill -->
+        <button type="button" class="btn btn-secondary btn-sm" onclick="autofillLogin('warden')" style="width: 100%; margin: 1.2rem 0; font-size: 0.82rem; border-style: dashed;">
+          ⚡ Auto-Fill Demo Warden (Dr. Sharma)
+        </button>
+
+        <div id="warden-login-error" class="auth-error-box"></div>
+
+        <form id="warden-login-form">
+          <div class="form-control-block" style="margin-bottom: 1rem;">
+            <label for="warden-login-email">Warden Email or Staff ID *</label>
+            <input type="text" id="warden-login-email" class="input-field" placeholder="e.g. warden.sharma@campus.edu" required>
+          </div>
+
+          <div class="form-control-block" style="margin-bottom: 1.5rem;">
+            <label for="warden-login-pwd">Password *</label>
+            <div class="pwd-input-wrap">
+              <input type="password" id="warden-login-pwd" class="input-field" placeholder="Enter password" required>
+              <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility('warden-login-pwd', this)" title="Show/Hide Password">
+                👁️
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="warden-login-btn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.8rem;">
+            Sign In as Warden →
+          </button>
+        </form>
+      </div>
     </div>
 
-    <!-- ================= VIEW 2: STUDENT DASHBOARD ================= -->
+    <!-- ================= VIEW 2: STUDENT PORTAL ================= -->
     <div id="view-student" style="display: none;">
       <div class="canvas-container">
-        <!-- Greeting Header -->
-        <div class="dashboard-header">
-          <div class="greeting-text">
+        <!-- Student Greeting Banner -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
             <h1>Hey, roomie! 👋</h1>
-            <p>Here’s what’s happening in your hostel today. Logged in as <strong id="student-user-name">Aarav Sharma</strong> (<span id="student-user-block">Block B</span>).</p>
+            <p style="color: var(--color-text-secondary); font-size: 1rem;">
+              Here’s what’s happening in your hostel today. Logged in as <strong id="student-greeting-name">Aarav Sharma</strong> (<span id="student-greeting-block">Block B</span>).
+            </p>
           </div>
-          <button class="btn btn-primary" data-view-nav="newComplaint">
-            + Report New Issue
-          </button>
+          <div style="display: flex; gap: 0.8rem;">
+            <button class="btn btn-secondary" data-view-nav="mess">Mess Menu 🍛</button>
+            <button class="btn btn-primary" data-view-nav="newComplaint">+ Report New Issue</button>
+          </div>
         </div>
 
         <!-- Metrics Row -->
-        <div class="metrics-row">
-          <div class="metric-card">
-            <span class="metric-label">My Total Reports</span>
-            <span class="metric-val" id="stat-student-total">0</span>
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <span class="metric-label">My Reports</span>
+            <span class="metric-number" id="stat-student-total">0</span>
           </div>
-          <div class="metric-card">
+          <div class="metric-box">
             <span class="metric-label">Submitted</span>
-            <span class="metric-val" id="stat-student-submitted">0</span>
+            <span class="metric-number" id="stat-student-submitted">0</span>
           </div>
-          <div class="metric-card">
+          <div class="metric-box">
             <span class="metric-label">In Progress</span>
-            <span class="metric-val" id="stat-student-progress">0</span>
+            <span class="metric-number" id="stat-student-progress">0</span>
           </div>
-          <div class="metric-card">
-            <span class="metric-label">Resolved</span>
-            <span class="metric-val" id="stat-student-resolved">0</span>
+          <div class="metric-box pending-highlight">
+            <span class="metric-label">⚠️ Needs My Verification</span>
+            <span class="metric-number" id="stat-student-pending-verify" style="color: var(--color-pending);">0</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-label">Fully Resolved</span>
+            <span class="metric-number" id="stat-student-resolved">0</span>
           </div>
         </div>
 
-        <!-- Toolbar / Search / Filter -->
-        <div class="toolbar-card">
-          <div class="search-box">
+        <!-- Search and Filters -->
+        <div class="toolbar-panel">
+          <div class="search-input-wrap">
             <span>🔍</span>
-            <input type="text" id="student-search-input" placeholder="Search by title, room, or keywords...">
+            <input type="text" id="student-search-input" placeholder="Search by keywords, room, or issue...">
           </div>
 
-          <div class="filter-group">
-            <select id="student-filter-category" class="filter-select">
+          <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <select id="student-filter-category" class="select-filter">
               <option value="">All Categories</option>
-              <option value="Wi-Fi and Internet">Wi-Fi and Internet</option>
-              <option value="Water Supply">Water Supply</option>
-              <option value="Electricity">Electricity</option>
-              <option value="Food Quality">Food Quality</option>
-              <option value="Cleanliness">Cleanliness</option>
-              <option value="Maintenance">Maintenance</option>
-              <option value="Safety">Safety</option>
-              <option value="Other">Other</option>
+              <option value="Electricity & Lighting">Electricity & Lighting</option>
+              <option value="Plumbing & Water Supply">Plumbing & Water Supply</option>
+              <option value="Washroom & Sanitation">Washroom & Sanitation</option>
+              <option value="Cleaning & Hygiene">Cleaning & Hygiene</option>
+              <option value="Furniture & Fixtures">Furniture & Fixtures</option>
+              <option value="Civil & Structural Damage">Civil & Structural Damage</option>
+              <option value="Internet & Networking">Internet & Networking</option>
+              <option value="Mess & Food">Mess & Food</option>
+              <option value="Safety & Security">Safety & Security</option>
+              <option value="Other / Unclear">Other / Unclear</option>
             </select>
 
-            <select id="student-filter-status" class="filter-select">
+            <select id="student-filter-status" class="select-filter">
               <option value="">All Statuses</option>
               <option value="Submitted">Submitted</option>
               <option value="Under Review">Under Review</option>
               <option value="In Progress">In Progress</option>
+              <option value="Pending Student Confirmation">Pending Student Confirmation</option>
               <option value="Resolved">Resolved</option>
+              <option value="Reopened">Reopened</option>
             </select>
 
-            <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.88rem; font-weight: 600; cursor: pointer;">
+            <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.88rem; font-weight: 700; cursor: pointer;">
               <input type="checkbox" id="student-filter-mine">
               My Complaints Only
             </label>
@@ -248,9 +313,7 @@
         </div>
 
         <!-- Complaints Stream -->
-        <div id="student-complaints-list" class="complaints-grid">
-          <!-- Rendered dynamically -->
-        </div>
+        <div id="student-complaints-list" class="complaints-stream"></div>
       </div>
     </div>
 
@@ -259,42 +322,44 @@
       <div class="canvas-container">
         <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
           <button class="btn btn-secondary btn-sm" data-view-nav="student">← Back to Dashboard</button>
-          <span style="font-size: 0.88rem; color: var(--color-text-secondary);">Submit a verified hostel complaint</span>
+          <span style="font-size: 0.9rem; color: var(--color-text-secondary);">Submit a verified hostel complaint</span>
         </div>
 
-        <div class="form-card">
-          <div style="margin-bottom: 1.5rem;">
-            <h2 style="font-size: 1.8rem; margin-bottom: 0.2rem;">Report a Hostel Issue</h2>
+        <div class="form-shell">
+          <div style="margin-bottom: 1.8rem;">
+            <h2 style="font-size: 2rem; margin-bottom: 0.3rem;">Report a Hostel Issue</h2>
             <p style="color: var(--color-text-secondary); font-size: 0.95rem;">
-              Fill in the details below. Our Gemma AI model will automatically analyze and prioritize your request.
+              Your profile details are auto-filled below. Attach photos and use Gemma 4 Vision for automatic triage.
             </p>
           </div>
 
           <form id="complaint-form">
-            <div class="form-grid">
-              <div class="form-group form-full">
+            <div class="form-layout-grid">
+              <div class="form-control-block col-full">
                 <label for="form-title">Complaint Title *</label>
-                <input type="text" id="form-title" class="form-input" placeholder="e.g. Wi-Fi router keeps disconnecting on 3rd floor" required>
+                <input type="text" id="form-title" class="input-field" placeholder="e.g. Wi-Fi router keeps disconnecting on 3rd floor west" required>
               </div>
 
-              <div class="form-group">
+              <div class="form-control-block">
                 <label for="form-category">Category *</label>
-                <select id="form-category" class="form-select" required>
+                <select id="form-category" class="select-field" required>
                   <option value="">Select category...</option>
-                  <option value="Wi-Fi and Internet">Wi-Fi and Internet</option>
-                  <option value="Water Supply">Water Supply</option>
-                  <option value="Electricity">Electricity</option>
-                  <option value="Food Quality">Food Quality</option>
-                  <option value="Cleanliness">Cleanliness</option>
-                  <option value="Maintenance">Maintenance</option>
-                  <option value="Safety">Safety</option>
-                  <option value="Other">Other</option>
+                  <option value="Electricity & Lighting">Electricity & Lighting</option>
+                  <option value="Plumbing & Water Supply">Plumbing & Water Supply</option>
+                  <option value="Washroom & Sanitation">Washroom & Sanitation</option>
+                  <option value="Cleaning & Hygiene">Cleaning & Hygiene</option>
+                  <option value="Furniture & Fixtures">Furniture & Fixtures</option>
+                  <option value="Civil & Structural Damage">Civil & Structural Damage</option>
+                  <option value="Internet & Networking">Internet & Networking</option>
+                  <option value="Mess & Food">Mess & Food</option>
+                  <option value="Safety & Security">Safety & Security</option>
+                  <option value="Other / Unclear">Other / Unclear</option>
                 </select>
               </div>
 
-              <div class="form-group">
+              <div class="form-control-block">
                 <label for="form-block">Hostel Block *</label>
-                <select id="form-block" class="form-select" required>
+                <select id="form-block" class="select-field" required>
                   <option value="">Select block...</option>
                   <option value="Block A (Boys)">Block A (Boys)</option>
                   <option value="Block B (Boys)">Block B (Boys)</option>
@@ -304,57 +369,83 @@
                 </select>
               </div>
 
-              <div class="form-group">
-                <label for="form-location">Specific Location *</label>
-                <input type="text" id="form-location" class="form-input" placeholder="e.g. 3rd Floor, Room 302 or Common Washroom" required>
+              <div class="form-control-block">
+                <label for="form-floor">Floor</label>
+                <input type="text" id="form-floor" class="input-field" placeholder="e.g. 3rd Floor">
               </div>
 
-              <div class="form-group">
+              <div class="form-control-block">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <label for="form-location">Specific Location *</label>
+                  <label style="font-size: 0.78rem; display: flex; align-items: center; gap: 0.3rem; cursor: pointer; color: var(--color-primary);">
+                    <input type="checkbox" id="form-own-room-check" checked> My Room
+                  </label>
+                </div>
+                <input type="text" id="form-location" class="input-field" placeholder="Room location" required>
+              </div>
+
+              <div class="form-control-block col-full">
                 <label for="form-duration">Duration of Issue (Optional)</label>
-                <input type="text" id="form-duration" class="form-input" placeholder="e.g. Since yesterday morning, 2 days">
+                <input type="text" id="form-duration" class="input-field" placeholder="e.g. Since yesterday morning, 2 days">
               </div>
 
-              <div class="form-group form-full">
+              <!-- Image Attachment Upload Zone -->
+              <div class="form-control-block col-full">
+                <label>Attach Issue Photo / Evidence (Gemma 4 Vision Enabled)</label>
+                <div id="image-dropzone" class="image-upload-zone">
+                  <div style="font-size: 2rem;">📸</div>
+                  <strong>Click or Drag an image here</strong>
+                  <span style="font-size: 0.8rem; color: var(--color-text-secondary);">Supports JPG, PNG, WebP up to 8MB</span>
+                  <input type="file" id="form-image-input" accept="image/*" style="display: none;">
+                </div>
+
+                <div id="image-preview-wrap" class="image-preview-strip" style="display: none;">
+                  <img id="image-preview-thumb" class="preview-thumb" alt="Preview">
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.9rem;">Image attached</div>
+                    <div style="font-size: 0.8rem; color: var(--color-success);">Ready for Gemma 4 Vision analysis</div>
+                    <button type="button" id="image-remove-btn" class="btn btn-danger btn-sm" style="margin-top: 0.4rem;">Remove Photo</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-control-block col-full">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;">
-                  <label for="form-description">Description of the Problem *</label>
+                  <label for="form-description">Description of Problem *</label>
                   <button type="button" id="form-ai-btn" class="btn btn-ai btn-sm">
-                    <span>✨ Auto-Analyze with Gemma AI</span>
+                    <span>✨ Auto-Analyze with Gemma 4 Vision</span>
                   </button>
                 </div>
-                <textarea id="form-description" class="form-textarea" placeholder="Describe the issue in detail. If there are visible hazards (sparks, leaks, smoke), mention them clearly." required></textarea>
+                <textarea id="form-description" class="textarea-field" placeholder="Describe the issue in detail. If there are visible hazards (sparks, leaks, burning smell), mention them clearly." required></textarea>
               </div>
             </div>
 
-            <!-- Gemma AI Real-time Preview Box -->
-            <div id="form-ai-preview" class="ai-preview-box">
-              <div class="ai-preview-header">
-                <span class="ai-pill-label">🧠 Gemma 4 Analysis Preview</span>
-                <span style="font-size: 0.78rem; color: #5B488C;">Server-side verified</span>
+            <!-- Gemma 4 Analysis Result Box -->
+            <div id="form-ai-preview" style="display: none; background: var(--color-bg-surface); border: 1px solid var(--color-ai); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                <span class="status-badge" style="background: var(--color-ai-bg); color: var(--color-ai);">🧠 Gemma 4 Vision Analysis</span>
+                <span id="form-ai-model-tag" style="font-size: 0.8rem; color: var(--color-text-secondary);">Validated Server-Side • gemma-4-26b-a4b-it</span>
               </div>
-              <div style="font-size: 0.9rem; display: flex; flex-direction: column; gap: 0.4rem;">
-                <div><strong>Suggested Category:</strong> <span id="form-ai-cat-suggest">-</span></div>
+              <div style="font-size: 0.92rem; display: flex; flex-direction: column; gap: 0.45rem;">
+                <div><strong>Suggested Category:</strong> <span id="form-ai-cat-suggest" style="color: var(--color-primary); font-weight: 700;">-</span></div>
+                <div><strong>Subcategory:</strong> <span id="form-ai-subcat-suggest">-</span></div>
+                <div><strong>Confidence:</strong> <span id="form-ai-confidence-suggest">-</span></div>
+                <div><strong>Visual Evidence:</strong> <span id="form-ai-evidence-suggest">-</span></div>
                 <div><strong>Suggested Priority:</strong> <span id="form-ai-prio-suggest">-</span></div>
                 <div><strong>Factual Summary:</strong> <span id="form-ai-summary-suggest">-</span></div>
-                <div id="form-ai-hazard-alert" style="display: none; background: #FFD4CE; padding: 0.4rem 0.6rem; border-radius: 6px; color: #8A0B05; font-weight: 700; margin-top: 0.3rem;">
+                <div id="form-ai-review-alert" style="display: none; background: rgba(251, 191, 36, 0.16); border: 1px solid rgba(251, 191, 36, 0.4); padding: 0.6rem 0.8rem; border-radius: 6px; color: var(--color-pending); font-weight: 700;">
+                  ⚠️ Flagged for Human Review: Ambiguous or low-confidence visual evidence.
+                </div>
+                <div id="form-ai-hazard-alert" style="display: none; background: var(--color-urgent-bg); border: 1px solid var(--color-urgent-border); padding: 0.6rem 0.8rem; border-radius: 6px; color: var(--color-urgent); font-weight: 700; margin-top: 0.4rem;">
                   🚨 Safety Hazard Detected: <span id="form-ai-hazard-reason"></span>
                 </div>
               </div>
             </div>
 
-            <!-- Duplicate / Related Issues Warning Box -->
-            <div id="form-related-warning" class="related-warning-box">
-              <div style="font-size: 0.88rem; font-weight: 700; color: #7A5300; display: flex; align-items: center; gap: 0.4rem;">
-                ℹ️ Similar Issues Reported Nearby
-              </div>
-              <p style="font-size: 0.82rem; color: var(--color-text-secondary); margin-top: 0.2rem;">
-                We found open complaints in your block that might match yours. You can support them directly to boost urgency instead of creating a duplicate!
-              </p>
-              <div id="form-related-list"></div>
-            </div>
-
-            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+            <!-- Form Action Buttons -->
+            <div style="display: flex; justify-content: flex-end; gap: 1rem;">
               <button type="button" class="btn btn-secondary" data-view-nav="student">Cancel</button>
-              <button type="submit" id="form-submit-btn" class="btn btn-primary" style="padding: 0.75rem 1.8rem;">
+              <button type="submit" id="form-submit-btn" class="btn btn-primary" style="padding: 0.8rem 2rem;">
                 Submit Complaint →
               </button>
             </div>
@@ -363,49 +454,54 @@
       </div>
     </div>
 
-    <!-- ================= VIEW 4: WARDEN DASHBOARD ================= -->
+    <!-- ================= VIEW 4: WARDEN PORTAL ================= -->
     <div id="view-warden" style="display: none;">
       <div class="canvas-container">
-        <!-- Warden Header -->
-        <div class="dashboard-header">
-          <div class="greeting-text">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
             <h1>Hostel Warden Portal 🛡️</h1>
-            <p>Campus-wide complaint triage, hazard management, and status updates.</p>
+            <p style="color: var(--color-text-secondary); font-size: 1rem;">
+              Complaint triage, technician dispatch, student directory, and dual resolution tracking.
+            </p>
           </div>
-          <div style="display: flex; gap: 0.6rem;">
-            <span class="badge badge-ai" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Gemma 4 Triage Engine</span>
+          <div style="display: flex; gap: 0.8rem;">
+            <button class="btn btn-secondary" data-view-nav="curfew">Curfew Rules</button>
           </div>
         </div>
 
         <!-- Warden Metrics -->
-        <div class="metrics-row">
-          <div class="metric-card">
-            <span class="metric-label">Total Open Issues</span>
-            <span class="metric-val" id="stat-warden-open">0</span>
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <span class="metric-label">Total Open</span>
+            <span class="metric-number" id="stat-warden-open">0</span>
           </div>
-          <div class="metric-card urgent">
-            <span class="metric-label">🚨 Urgent / Safety Hazards</span>
-            <span class="metric-val" id="stat-warden-urgent" style="color: #900C05;">0</span>
+          <div class="metric-box urgent-highlight">
+            <span class="metric-label">🚨 Urgent Hazards</span>
+            <span class="metric-number" id="stat-warden-urgent" style="color: var(--color-urgent);">0</span>
           </div>
-          <div class="metric-card">
+          <div class="metric-box">
             <span class="metric-label">In Progress</span>
-            <span class="metric-val" id="stat-warden-progress">0</span>
+            <span class="metric-number" id="stat-warden-progress">0</span>
           </div>
-          <div class="metric-card">
-            <span class="metric-label">Resolved</span>
-            <span class="metric-val" id="stat-warden-resolved">0</span>
+          <div class="metric-box pending-highlight">
+            <span class="metric-label">⏳ Awaiting Student Inspection</span>
+            <span class="metric-number" id="stat-warden-pending-confirm" style="color: var(--color-pending);">0</span>
+          </div>
+          <div class="metric-box">
+            <span class="metric-label">Fully Resolved</span>
+            <span class="metric-number" id="stat-warden-resolved">0</span>
           </div>
         </div>
 
-        <!-- Warden Search and Multi-Filters -->
-        <div class="toolbar-card">
-          <div class="search-box">
+        <!-- Warden Toolbar -->
+        <div class="toolbar-panel">
+          <div class="search-input-wrap">
             <span>🔍</span>
-            <input type="text" id="warden-search-input" placeholder="Search complaints by room, resident, or keywords...">
+            <input type="text" id="warden-search-input" placeholder="Search by resident, room, or issue...">
           </div>
 
-          <div class="filter-group">
-            <select id="warden-filter-block" class="filter-select">
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <select id="warden-filter-block" class="select-filter">
               <option value="">All Hostel Blocks</option>
               <option value="Block A (Boys)">Block A (Boys)</option>
               <option value="Block B (Boys)">Block B (Boys)</option>
@@ -414,110 +510,416 @@
               <option value="PG Block">PG Block</option>
             </select>
 
-            <select id="warden-filter-category" class="filter-select">
+            <select id="warden-filter-category" class="select-filter">
               <option value="">All Categories</option>
-              <option value="Wi-Fi and Internet">Wi-Fi and Internet</option>
-              <option value="Water Supply">Water Supply</option>
-              <option value="Electricity">Electricity</option>
-              <option value="Food Quality">Food Quality</option>
-              <option value="Cleanliness">Cleanliness</option>
-              <option value="Maintenance">Maintenance</option>
-              <option value="Safety">Safety</option>
-              <option value="Other">Other</option>
+              <option value="Electricity & Lighting">Electricity & Lighting</option>
+              <option value="Plumbing & Water Supply">Plumbing & Water Supply</option>
+              <option value="Washroom & Sanitation">Washroom & Sanitation</option>
+              <option value="Cleaning & Hygiene">Cleaning & Hygiene</option>
+              <option value="Furniture & Fixtures">Furniture & Fixtures</option>
+              <option value="Civil & Structural Damage">Civil & Structural Damage</option>
+              <option value="Internet & Networking">Internet & Networking</option>
+              <option value="Mess & Food">Mess & Food</option>
+              <option value="Safety & Security">Safety & Security</option>
+              <option value="Other / Unclear">Other / Unclear</option>
             </select>
 
-            <select id="warden-filter-status" class="filter-select">
+            <select id="warden-filter-status" class="select-filter">
               <option value="">All Statuses</option>
               <option value="Submitted">Submitted</option>
               <option value="Under Review">Under Review</option>
               <option value="In Progress">In Progress</option>
+              <option value="Pending Student Confirmation">Pending Student Confirmation</option>
               <option value="Resolved">Resolved</option>
+              <option value="Reopened">Reopened</option>
             </select>
           </div>
         </div>
 
         <!-- Warden Complaints Feed -->
-        <div id="warden-complaints-list" class="complaints-grid">
-          <!-- Rendered dynamically -->
+        <div id="warden-complaints-list" class="complaints-stream" style="margin-bottom: 3.5rem;"></div>
+
+        <!-- STUDENT MANAGEMENT (WARDEN RESTRICTED) -->
+        <div style="background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: var(--radius-xl); padding: 2.2rem; box-shadow: var(--shadow-card); margin-top: 3rem;">
+          <h2 style="font-size: 1.8rem; margin-bottom: 0.3rem;">🎓 Student Directory & Account Management</h2>
+          <p style="color: var(--color-text-secondary); margin-bottom: 2rem;">
+            Register new hostel residents, allocate rooms, and securely reset login credentials.
+          </p>
+
+          <!-- Create Student Form -->
+          <form id="create-student-form" style="background: var(--color-bg-surface); padding: 1.5rem; border-radius: var(--radius-lg); margin-bottom: 2rem;">
+            <h3 style="font-size: 1.15rem; margin-bottom: 1rem; color: var(--color-primary);">+ Register New Student Account</h3>
+            <div class="form-layout-grid" style="margin-bottom: 1rem;">
+              <div class="form-control-block">
+                <label>Student Full Name *</label>
+                <input type="text" id="new-student-name" class="input-field" placeholder="e.g. Rohan Mehta" required>
+              </div>
+              <div class="form-control-block">
+                <label>Campus Email *</label>
+                <input type="email" id="new-student-email" class="input-field" placeholder="e.g. rohan.mehta@campus.edu" required>
+              </div>
+              <div class="form-control-block">
+                <label>Hostel Block *</label>
+                <select id="new-student-block" class="select-field" required>
+                  <option value="Block A (Boys)">Block A (Boys)</option>
+                  <option value="Block B (Boys)" selected>Block B (Boys)</option>
+                  <option value="Block C (Girls)">Block C (Girls)</option>
+                  <option value="Block D (Girls)">Block D (Girls)</option>
+                  <option value="PG Block">PG Block</option>
+                </select>
+              </div>
+              <div class="form-control-block">
+                <label>Floor *</label>
+                <input type="text" id="new-student-floor" class="input-field" placeholder="e.g. 2nd Floor" required>
+              </div>
+              <div class="form-control-block">
+                <label>Room Number *</label>
+                <input type="text" id="new-student-room" class="input-field" placeholder="e.g. B-210" required>
+              </div>
+              <div class="form-control-block">
+                <label>Phone Number</label>
+                <input type="text" id="new-student-phone" class="input-field" placeholder="e.g. +91-98765-44332">
+              </div>
+              <div class="form-control-block col-full">
+                <label>Initial Password (Leave blank for auto-generated secure password)</label>
+                <input type="text" id="new-student-pwd" class="input-field" placeholder="Leave empty for auto-generation">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Student Account →</button>
+          </form>
+
+          <!-- Student List Table -->
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.92rem;">
+              <thead>
+                <tr style="border-bottom: 2px solid var(--color-border); color: var(--color-text-secondary);">
+                  <th style="padding: 0.8rem 1rem;">Name</th>
+                  <th style="padding: 0.8rem 1rem;">Email</th>
+                  <th style="padding: 0.8rem 1rem;">Hostel Block</th>
+                  <th style="padding: 0.8rem 1rem;">Floor & Room</th>
+                  <th style="padding: 0.8rem 1rem;">Phone</th>
+                  <th style="padding: 0.8rem 1rem;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="warden-students-table-body">
+                <!-- Filled via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 5: MESS & DINING ================= -->
+    <div id="view-mess" style="display: none;">
+      <div class="canvas-container">
+        <div style="margin-bottom: 2rem;">
+          <h1>Hostel Mess & Dining Schedule 🍛</h1>
+          <p style="color: var(--color-text-secondary); font-size: 1rem;">
+            Nutritious campus meal timings and 7-day weekly rotation menu.
+          </p>
+        </div>
+
+        <!-- Meal Timings Grid -->
+        <div class="info-card" style="margin-bottom: 2rem;">
+          <h3>⏰ Daily Meal Timings</h3>
+          <div id="mess-timings-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.2rem;">
+            <!-- Filled via JS -->
+          </div>
+        </div>
+
+        <!-- Weekly Menu Selector -->
+        <div class="info-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; flex-wrap: wrap; gap: 0.8rem;">
+            <h3>📅 Weekly Mess Menu Schedule</h3>
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+              <button class="day-menu-pill active" data-day="Monday" onclick="selectMessDay('Monday')">Mon</button>
+              <button class="day-menu-pill" data-day="Tuesday" onclick="selectMessDay('Tuesday')">Tue</button>
+              <button class="day-menu-pill" data-day="Wednesday" onclick="selectMessDay('Wednesday')">Wed</button>
+              <button class="day-menu-pill" data-day="Thursday" onclick="selectMessDay('Thursday')">Thu</button>
+              <button class="day-menu-pill" data-day="Friday" onclick="selectMessDay('Friday')">Fri</button>
+              <button class="day-menu-pill" data-day="Saturday" onclick="selectMessDay('Saturday')">Sat</button>
+              <button class="day-menu-pill" data-day="Sunday" onclick="selectMessDay('Sunday')">Sun</button>
+            </div>
+          </div>
+
+          <div id="daily-mess-content">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 6: CURFEW & CONTACTS ================= -->
+    <div id="view-curfew" style="display: none;">
+      <div class="canvas-container">
+        <div style="margin-bottom: 2rem;">
+          <h1>Curfew Rules & Verified Contacts 🛡️</h1>
+          <p style="color: var(--color-text-secondary); font-size: 1rem;">
+            Hostel timings, night-pass guidelines, announcements, and direct warden helplines.
+          </p>
+        </div>
+
+        <!-- Curfew Timing Details -->
+        <div class="info-card" style="margin-bottom: 2rem;">
+          <h3>🚪 Campus Gate & Curfew Hours</h3>
+          <div class="timing-row">
+            <span>Weekday Curfew (Sun–Thu)</span>
+            <strong id="curfew-weekday-text" style="color: var(--color-primary); font-size: 1.05rem;">-</strong>
+          </div>
+          <div class="timing-row">
+            <span>Weekend Curfew (Fri & Sat)</span>
+            <strong id="curfew-weekend-text" style="color: var(--color-primary); font-size: 1.05rem;">-</strong>
+          </div>
+          <div class="timing-row">
+            <span>Late Entry Protocol</span>
+            <span id="curfew-policy-text">-</span>
+          </div>
+        </div>
+
+        <!-- Active Announcements -->
+        <div class="info-card" style="margin-bottom: 2rem;">
+          <h3>📢 Hostel Management Announcements</h3>
+          <div id="announcements-list"></div>
+        </div>
+
+        <!-- Verified Contacts Directory -->
+        <div id="contacts-grid" class="hostel-info-grid"></div>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 7: IN-APP USER MANUAL ================= -->
+    <div id="view-manual" style="display: none;">
+      <div class="canvas-container">
+        <div style="margin-bottom: 2rem;">
+          <h1>Hostlur User Manual & Workflow Guide 📖</h1>
+          <p style="color: var(--color-text-secondary); font-size: 1rem;">
+            Everything you need to know about using Hostlur as a Student or Warden.
+          </p>
+        </div>
+
+        <div class="manual-section">
+          <div class="manual-header" onclick="toggleManualAccordion(this)">
+            <span>1. How to Report an Issue & Attach Photos</span>
+            <span class="manual-arrow">▲</span>
+          </div>
+          <div class="manual-content" style="display: block;">
+            <p>1. Navigate to <strong>+ Report Issue</strong> from the top navigation bar.</p>
+            <p>2. Your <strong>Hostel Block</strong>, <strong>Floor</strong>, and <strong>Room</strong> are automatically populated from your verified student profile.</p>
+            <p>3. If the problem is in a common washroom or corridor, uncheck <em>"My Room"</em> to enter the custom location.</p>
+            <p>4. <strong>Attach Photo:</strong> Click the camera dropzone to upload an image of the leak, broken fixture, or hazard.</p>
+            <p>5. Click <strong>✨ Auto-Analyze with Gemma 4 Vision</strong>. The model analyzes both the visual evidence and your text to suggest category, priority, and summary before saving!</p>
+          </div>
+        </div>
+
+        <div class="manual-section">
+          <div class="manual-header" onclick="toggleManualAccordion(this)">
+            <span>2. Dual Resolution Verification Workflow</span>
+            <span class="manual-arrow">▼</span>
+          </div>
+          <div class="manual-content" style="display: none;">
+            <p>In traditional hostels, maintenance staff frequently mark tickets as "Resolved" without checking if the repair actually fixed the root problem. Hostlur enforces <strong>Dual Verification</strong>:</p>
+            <p>• <strong>Step 1:</strong> The technician visits and the Warden marks the ticket as <em>"Pending Student Confirmation"</em>.</p>
+            <p>• <strong>Step 2:</strong> A golden banner appears on the student's dashboard: <em>"Warden marked this issue resolved. Please inspect."</em></p>
+            <p>• <strong>Step 3:</strong> If the fix works, the student clicks <strong>✅ Confirm Resolved</strong> and gives a 1–5 star rating.</p>
+            <p>• <strong>Step 4:</strong> If the faucet is still dripping or the Wi-Fi still disconnects, the student clicks <strong>❌ Still Broken / Reopen</strong>, which instantly reopens the ticket with an escalation note for the warden!</p>
+          </div>
+        </div>
+
+        <div class="manual-section">
+          <div class="manual-header" onclick="toggleManualAccordion(this)">
+            <span>3. Emergency Safety Hazard Protocol</span>
+            <span class="manual-arrow">▼</span>
+          </div>
+          <div class="manual-content" style="display: none;">
+            <p>Hostlur utilizes a <strong>deterministic safety engine</strong> that scans all incoming reports for critical physical and electrical hazards (burning smells, sparking sockets, exposed wires, gas leaks, ceiling cracks).</p>
+            <p>When a hazard keyword is detected:</p>
+            <p>• The ticket priority is automatically elevated to <strong>Urgent</strong>.</p>
+            <p>• A prominent 🚨 Hazard Banner is attached to the ticket.</p>
+            <p>• It appears immediately at the top of the Warden's triage queue for mandatory priority inspection.</p>
+          </div>
+        </div>
+
+        <div class="manual-section">
+          <div class="manual-header" onclick="toggleManualAccordion(this)">
+            <span>4. Warden Portal & Student Account Management</span>
+            <span class="manual-arrow">▼</span>
+          </div>
+          <div class="manual-content" style="display: none;">
+            <p>Authorized wardens have access to campus-wide triage:</p>
+            <p>• <strong>Status Management:</strong> Change status from Submitted → Under Review → In Progress → Pending Student Confirmation.</p>
+            <p>• <strong>Student Directory:</strong> Register new student accounts with verified room allocations.</p>
+            <p>• <strong>Secure Password Reset:</strong> Wardens can generate single-use temporary passwords for students who have forgotten their credentials.</p>
+          </div>
+        </div>
+
+        <div class="manual-section">
+          <div class="manual-header" onclick="toggleManualAccordion(this)">
+            <span>5. Theme Switching & Profile Settings</span>
+            <span class="manual-arrow">▼</span>
+          </div>
+          <div class="manual-content" style="display: none;">
+            <p>• <strong>Dark/Light Theme:</strong> Click the sun/moon icon in the top right navbar to seamlessly switch between the deep carbon black theme and crisp linen light theme. Your preference is saved across sessions.</p>
+            <p>• <strong>Persona Switcher:</strong> During hackathon evaluations, use the top navbar dropdown to instantly switch between Student Aarav, Student Priya, and Chief Warden Dr. Sharma.</p>
+          </div>
         </div>
       </div>
     </div>
   </main>
 
-  <!-- ================= COMPLAINT DETAIL & WARDEN ACTION MODAL ================= -->
-  <div id="complaint-detail-modal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div>
-          <span id="modal-complaint-id" style="font-family: monospace; font-size: 0.8rem; font-weight: 700; color: var(--color-text-secondary);">CMP-ID</span>
-          <h2 id="modal-complaint-title" style="font-size: 1.25rem;">Complaint Title</h2>
+  <!-- ================= MODAL 1: LOGIN / SIGN IN ================= -->
+  <div id="login-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 480px;">
+      <div class="modal-dialog-header">
+        <h3 style="font-size: 1.3rem;">Sign In to Hostlur</h3>
+        <button class="btn btn-secondary btn-sm" onclick="closeLoginModal()">✕</button>
+      </div>
+      <div class="modal-dialog-body">
+        <!-- Role Tabs -->
+        <div style="display: flex; gap: 0.5rem; background: var(--color-bg-surface); padding: 0.35rem; border-radius: var(--radius-md);">
+          <button type="button" class="login-tab-btn active btn btn-sm" data-role="student" onclick="setLoginRoleTab('student')" style="flex: 1;">🎓 Student Login</button>
+          <button type="button" class="login-tab-btn btn btn-sm" data-role="warden" onclick="setLoginRoleTab('warden')" style="flex: 1;">🛡️ Warden Login</button>
         </div>
-        <button class="btn btn-secondary btn-sm" onclick="closeComplaintModal()">✕ Close</button>
+
+        <!-- 1-Click Demo Hint -->
+        <div id="login-demo-hint" style="background: var(--color-primary-subtle); border: 1px solid var(--color-border); padding: 0.8rem; border-radius: var(--radius-md); font-size: 0.82rem; line-height: 1.5;"></div>
+
+        <form id="login-form">
+          <input type="hidden" id="login-role-hidden" value="student">
+          <div class="form-control-block" style="margin-bottom: 1rem;">
+            <label>Campus Email or ID</label>
+            <input type="text" id="login-email-input" class="input-field" placeholder="e.g. aarav@campus.edu" required>
+          </div>
+          <div class="form-control-block" style="margin-bottom: 1.5rem;">
+            <label>Password</label>
+            <input type="password" id="login-password-input" class="input-field" placeholder="Enter password" required>
+          </div>
+          <button type="submit" id="login-submit-btn" class="btn btn-primary" style="width: 100%;">Sign In →</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 2: DUAL RESOLUTION CONFIRM / REOPEN ================= -->
+  <div id="resolution-confirm-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-dialog-header">
+        <h3 id="resolution-modal-title">Confirm Resolution</h3>
+        <button class="btn btn-secondary btn-sm" onclick="closeResolutionModal()">✕</button>
+      </div>
+      <div class="modal-dialog-body">
+        <!-- Confirm Fields -->
+        <div id="resolution-confirm-fields">
+          <p style="color: var(--color-text-secondary); font-size: 0.92rem; margin-bottom: 1.2rem;">
+            Please rate your satisfaction with the repair work done by hostel staff:
+          </p>
+          <div class="form-control-block" style="margin-bottom: 1rem;">
+            <label>Satisfaction Rating (1 to 5 Stars)</label>
+            <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.4rem;">
+              <label><input type="radio" name="star-rating" value="5" checked> ★★★★★ (5/5)</label>
+              <label><input type="radio" name="star-rating" value="4"> ★★★★☆ (4/5)</label>
+              <label><input type="radio" name="star-rating" value="3"> ★★★☆☆ (3/5)</label>
+            </div>
+          </div>
+          <div class="form-control-block">
+            <label>Feedback or Note (Optional)</label>
+            <input type="text" id="resolution-feedback-input" class="input-field" placeholder="e.g. Issue resolved properly, thank you.">
+          </div>
+        </div>
+
+        <!-- Reject Fields -->
+        <div id="resolution-reject-fields" style="display: none;">
+          <p style="color: var(--color-urgent); font-size: 0.92rem; margin-bottom: 1.2rem;">
+            Please explain why this issue is not yet resolved. The ticket will be reopened immediately:
+          </p>
+          <div class="form-control-block">
+            <label>Why does the issue still persist? *</label>
+            <textarea id="resolution-reopen-reason-input" class="textarea-field" placeholder="e.g. Faucet is still leaking from the lower pipe joints." style="min-height: 90px;"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-dialog-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeResolutionModal()">Cancel</button>
+        <button type="button" id="resolution-submit-btn" class="btn btn-primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 3: COMPLAINT DETAILS & AUDIT ================= -->
+  <div id="complaint-detail-modal" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="modal-dialog-header">
+        <div>
+          <span id="modal-complaint-id" class="card-id-stamp">CMP-ID</span>
+          <h3 id="modal-complaint-title" style="font-size: 1.25rem;">Complaint Title</h3>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="closeComplaintModal()">✕</button>
       </div>
 
-      <div class="modal-body">
-        <!-- Badges Bar -->
-        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-          <span id="modal-complaint-status-badge" class="badge badge-submitted">Status</span>
-          <span id="modal-complaint-priority-badge" class="badge badge-medium">Priority</span>
+      <div class="modal-dialog-body">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <span id="modal-complaint-status-badge" class="status-badge badge-submitted">Status</span>
+          <span id="modal-complaint-priority-badge" class="status-badge badge-submitted">Priority</span>
         </div>
 
-        <!-- Location & Resident Meta -->
-        <div style="background: var(--color-surface); padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.3rem;">
+        <!-- Meta Block -->
+        <div style="background: var(--color-bg-surface); padding: 0.85rem 1.2rem; border-radius: var(--radius-md); font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.35rem;">
           <div><strong>Location:</strong> <span id="modal-complaint-location">-</span></div>
           <div><strong>Reported By:</strong> <span id="modal-complaint-author">-</span></div>
           <div><strong>Submitted:</strong> <span id="modal-complaint-time">-</span></div>
         </div>
 
-        <!-- Full Complaint Text -->
-        <div>
-          <h4 style="font-size: 0.92rem; margin-bottom: 0.4rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em;">Resident Description</h4>
-          <p id="modal-complaint-desc" style="font-size: 0.95rem; line-height: 1.6; background: #FFFFFF; border: 1px solid var(--color-border); padding: 0.8rem 1rem; border-radius: var(--radius-md);"></p>
+        <!-- Attached Image Preview -->
+        <div id="modal-complaint-image-wrap" style="display: none;">
+          <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-text-secondary); margin-bottom: 0.3rem;">ATTACHED EVIDENCE</div>
+          <img id="modal-complaint-image" alt="Evidence" style="width: 100%; max-height: 280px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--color-border); cursor: pointer;" onclick="openImageModal(this.src)">
         </div>
 
-        <!-- Gemma AI Recommendation Analysis Box -->
-        <div id="modal-ai-box" style="background: #F8F5FE; border: 1px solid #CDBDF5; border-radius: var(--radius-md); padding: 1rem;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
-            <span class="badge badge-ai">🧠 Gemma AI Model Recommendation</span>
-            <span style="font-size: 0.75rem; color: #4B3388;">API: gemma-4-26b-a4b-it</span>
+        <!-- Description -->
+        <div>
+          <div style="font-size: 0.82rem; font-weight: 700; color: var(--color-text-secondary); margin-bottom: 0.3rem;">RESIDENT REPORT</div>
+          <p id="modal-complaint-desc" style="font-size: 0.95rem; line-height: 1.6; background: var(--color-bg-surface); padding: 1rem; border-radius: var(--radius-md);"></p>
+        </div>
+
+        <!-- Dual Resolution Status Box -->
+        <div id="modal-dual-resolution-info"></div>
+
+        <!-- Gemma 4 Analysis Box -->
+        <div id="modal-ai-box" style="background: var(--color-ai-bg); border: 1px solid var(--color-ai); border-radius: var(--radius-md); padding: 1.2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+            <span class="status-badge" style="background: var(--color-ai); color: #1C0933;">🧠 Gemma 4 Model Breakdown</span>
+            <span style="font-size: 0.75rem; color: var(--color-ai);">gemma-4-26b-a4b-it</span>
           </div>
           <div style="font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.35rem;">
             <div><strong>Factual Summary:</strong> <span id="modal-ai-summary"></span></div>
             <div><strong>Suggested Category:</strong> <span id="modal-ai-category"></span></div>
             <div><strong>Suggested Priority:</strong> <span id="modal-ai-priority"></span></div>
-            <div id="modal-ai-missing-wrap" style="display: none; margin-top: 0.2rem;">
-              <strong>Missing Information to follow up on:</strong>
-              <ul id="modal-ai-missing" style="padding-left: 1.2rem; margin-top: 0.2rem;"></ul>
-            </div>
           </div>
         </div>
 
-        <!-- Status History Timeline -->
+        <!-- Timeline History -->
         <div>
-          <h4 style="font-size: 0.92rem; margin-bottom: 0.6rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em;">Audit & Resolution History</h4>
-          <div id="modal-timeline" class="timeline-list">
-            <!-- Timeline items rendered dynamically -->
-          </div>
+          <h4 style="font-size: 0.92rem; margin-bottom: 0.8rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Audit & History Timeline</h4>
+          <div id="modal-timeline" class="audit-timeline"></div>
         </div>
 
-        <!-- Warden Status Update Controls -->
-        <div id="modal-warden-actions" style="display: none; background: #FFFDF0; border: 1px solid #F5CB5C; border-radius: var(--radius-md); padding: 1rem;">
-          <h4 style="font-size: 0.95rem; margin-bottom: 0.6rem; color: #6D4C00;">🛡️ Warden Status Management</h4>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 0.8rem;">
-            <div class="form-group">
-              <label for="modal-status-select" style="font-size: 0.82rem;">Update Status</label>
-              <select id="modal-status-select" class="form-select">
+        <!-- Warden Status Actions -->
+        <div id="modal-warden-actions" style="display: none; background: var(--color-bg-surface); border: 1px solid var(--color-primary); border-radius: var(--radius-md); padding: 1.2rem;">
+          <h4 style="font-size: 1rem; margin-bottom: 0.8rem; color: var(--color-primary);">🛡️ Warden Status Management</h4>
+          <div class="form-layout-grid" style="margin-bottom: 0.8rem;">
+            <div class="form-control-block">
+              <label>Update Status</label>
+              <select id="modal-status-select" class="select-field">
                 <option value="Submitted">Submitted</option>
                 <option value="Under Review">Under Review</option>
                 <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
+                <option value="Pending Student Confirmation">Pending Student Confirmation (Work Done)</option>
+                <option value="Resolved">Resolved (Direct Force Close)</option>
               </select>
             </div>
-
-            <div class="form-group">
-              <label for="modal-priority-select" style="font-size: 0.82rem;">Confirmed Priority</label>
-              <select id="modal-priority-select" class="form-select">
+            <div class="form-control-block">
+              <label>Confirmed Priority</label>
+              <select id="modal-priority-select" class="select-field">
                 <option value="Low">Low</option>
                 <option value="Medium">Medium</option>
                 <option value="High">High</option>
@@ -525,36 +927,65 @@
               </select>
             </div>
           </div>
-
-          <div class="form-group" style="margin-bottom: 0.8rem;">
-            <label for="modal-status-note" style="font-size: 0.82rem;">Status Note / Action Taken</label>
-            <input type="text" id="modal-status-note" class="form-input" placeholder="e.g. Electrician dispatched to 2nd floor switchboard.">
+          <div class="form-control-block" style="margin-bottom: 0.8rem;">
+            <label>Action Taken / Technician Note</label>
+            <input type="text" id="modal-status-note" class="input-field" placeholder="e.g. Electrician dispatched, replaced switch assembly.">
           </div>
-
-          <button type="button" id="modal-save-status-btn" class="btn btn-primary" style="width: 100%;">
-            Save Status Update
-          </button>
+          <button type="button" id="modal-save-status-btn" class="btn btn-primary" style="width: 100%;">Save Status Update</button>
         </div>
       </div>
-
-      <div class="modal-footer">
+      <div class="modal-dialog-footer">
         <button class="btn btn-secondary" onclick="closeComplaintModal()">Close</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast Notification Container -->
+  <!-- ================= MODAL 4: CREDENTIALS DISPLAY (WARDEN) ================= -->
+  <div id="credentials-display-modal" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 460px;">
+      <div class="modal-dialog-header">
+        <h3 id="cred-modal-title">Student Credentials</h3>
+        <button class="btn btn-secondary btn-sm" onclick="closeCredentialModal()">✕</button>
+      </div>
+      <div class="modal-dialog-body" style="text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔑</div>
+        <p style="color: var(--color-text-secondary); font-size: 0.92rem; margin-bottom: 1.5rem;">
+          Provide these initial credentials to the student. They will be prompted to update their password upon first login.
+        </p>
+        <div style="background: var(--color-bg-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.2rem; text-align: left; font-family: var(--font-mono); font-size: 0.95rem;">
+          <div><strong>Student:</strong> <span id="cred-modal-name">-</span></div>
+          <div><strong>Login:</strong> <span id="cred-modal-email">-</span></div>
+          <div style="margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px dashed var(--color-border);">
+            <strong style="color: var(--color-primary);">Password:</strong>
+            <span id="cred-modal-password" style="font-weight: 800; font-size: 1.1rem; color: var(--color-primary);">-</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-dialog-footer">
+        <button class="btn btn-primary" onclick="closeCredentialModal()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 5: FULLSCREEN IMAGE VIEWER ================= -->
+  <div id="image-viewer-modal" class="modal-backdrop" onclick="closeImageModal()">
+    <div style="max-width: 90vw; max-height: 90vh;">
+      <img id="image-viewer-el" alt="Enlarged complaint view" style="max-width: 100%; max-height: 85vh; border-radius: var(--radius-md); box-shadow: var(--shadow-float);">
+    </div>
+  </div>
+
+  <!-- Toast Container -->
   <div id="toast-container"></div>
 
   <!-- Footer -->
   <footer>
-    <div class="footer-content">
-      <div style="display: flex; align-items: center; gap: 0.5rem;">
-        <span style="font-weight: 800; color: var(--color-text);">Hostlur</span>
+    <div class="footer-inner">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span style="font-weight: 900; color: var(--color-text-main);">HOSTLUR</span>
         <span>— Hostel Life, Simplified.</span>
       </div>
-      <div style="font-size: 0.82rem;">
-        College Hackathon Demo • Powered by Google Gemma 4 (Google AI Studio API)
+      <div style="font-size: 0.85rem; color: var(--color-text-secondary);">
+        College Hackathon Demo • Powered by Google Gemma 4 Vision (`gemma-4-26b-a4b-it`)
       </div>
     </div>
   </footer>
