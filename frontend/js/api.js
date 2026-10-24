@@ -3,6 +3,10 @@ class HostlurAPI {
   constructor() {
     this.token = localStorage.getItem('hostlur_token') || null;
     this.currentUserId = localStorage.getItem('hostlur_user_id') || null;
+    // Configurable backend URL for production / external hosting (defaults to same-origin relative path)
+    this.baseUrl = (window.HOSTLUR_CONFIG && window.HOSTLUR_CONFIG.API_URL)
+      ? window.HOSTLUR_CONFIG.API_URL.replace(/\/$/, '')
+      : '';
   }
 
   setSession(token, user) {
@@ -35,6 +39,7 @@ class HostlurAPI {
   }
 
   async request(endpoint, options = {}) {
+    const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`;
     const config = {
       ...options,
       headers: {
@@ -44,7 +49,7 @@ class HostlurAPI {
     };
 
     try {
-      const response = await fetch(endpoint, config);
+      const response = await fetch(url, config);
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.detail || data.message || `HTTP ${response.status}`);

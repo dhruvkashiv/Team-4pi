@@ -870,7 +870,18 @@ def get_dashboard_stats(current_user: UserProfile = Depends(get_current_user)):
         }
     }
 
-# --- STATIC FILES FOR FRONTEND ---
+# --- STATIC FILES & UPLOAD SERVING ---
+@app.get("/static/uploads/{filename}")
+def serve_uploaded_image(filename: str):
+    """Serves uploaded complaint images across local and serverless environments."""
+    candidate = UPLOADS_DIR / filename
+    if candidate.is_file():
+        return FileResponse(str(candidate))
+    fallback = BASE_DIR / "frontend" / "uploads" / filename
+    if fallback.is_file():
+        return FileResponse(str(fallback))
+    raise HTTPException(status_code=404, detail="Uploaded image not found")
+
 frontend_dir = BASE_DIR / "frontend"
 if frontend_dir.exists():
     app.mount("/static", StaticFiles(directory=str(frontend_dir)), name="static")

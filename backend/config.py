@@ -1,4 +1,5 @@
 import os
+import shutil
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -16,13 +17,29 @@ DEBUG = os.getenv("DEBUG", "true").lower() in ("true", "1", "yes")
 GOOGLE_AI_API_KEY = os.getenv("GOOGLE_AI_API_KEY", "").strip()
 GEMMA_MODEL = os.getenv("GEMMA_MODEL", "gemma-4-26b-a4b-it").strip()
 
-# Database
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR}/hostlur.db")
-SQLITE_PATH = str(BASE_DIR / "hostlur.db")
+# Detect Vercel or Serverless execution
+IS_VERCEL = bool(os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
 
-# Static & Uploads Directory
-UPLOADS_DIR = BASE_DIR / "frontend" / "uploads"
-UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+# Database Configuration (Serverless /tmp migration for read-only lambdas)
+if IS_VERCEL:
+    SQLITE_PATH = "/tmp/hostlur.db"
+    bundled_db = BASE_DIR / "hostlur.db"
+    if not os.path.exists(SQLITE_PATH) and bundled_db.exists():
+        try:
+            shutil.copyfile(str(bundled_db), SQLITE_PATH)
+        except Exception:
+            pass
+    DATABASE_URL = f"sqlite:///{SQLITE_PATH}"
+    UPLOADS_DIR = Path("/tmp/uploads")
+else:
+    DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR}/hostlur.db")
+    SQLITE_PATH = str(BASE_DIR / "hostlur.db")
+    UPLOADS_DIR = BASE_DIR / "frontend" / "uploads"
+
+try:
+    UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
 
 # Authoritative 10 Standardized Categories
 ALLOWED_CATEGORIES = [
