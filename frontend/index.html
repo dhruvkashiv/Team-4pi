@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hostlur — Hostel Life, Simplified.</title>
+  <meta name="description" content="AI-assisted hostel complaint management platform powered by Google's Gemma model.">
+
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#" class="brand-logo" data-view-nav="landing">
+        <div class="brand-icon">H</div>
+        <span>Hostlur</span>
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          <li><button class="nav-link active" data-view="landing" data-view-nav="landing">Home</button></li>
+          <li><a href="#features" class="nav-link" data-view-nav="landing">Features</a></li>
+          <li><a href="#how-it-works" class="nav-link" data-view-nav="landing">How It Works</a></li>
+          <li><button class="nav-link" id="nav-warden-link" data-view="warden" data-view-nav="warden">For Wardens</button></li>
+          <li><button class="nav-link" id="nav-student-link" data-view="student" data-view-nav="student">Student Portal</button></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <!-- Persona Quick-Switch -->
+        <div class="persona-selector" title="Switch Demo Persona for Hackathon Evaluation">
+          <label for="user-switcher-select" style="font-size: 0.75rem; color: var(--color-text-secondary);">Demo Role:</label>
+          <select id="user-switcher-select" class="persona-select">
+            <option value="student-aarav">🎓 Student: Aarav</option>
+            <option value="student-priya">🎓 Student: Priya</option>
+            <option value="warden-sharma">🛡️ Warden: Dr. Sharma</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary btn-sm" data-view-nav="newComplaint">
+          + Report Issue
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ================= VIEW 1: LANDING PAGE ================= -->
+    <div id="view-landing">
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <div class="canvas-container">
+          <div class="eyebrow">
+            ⚡ AI-POWERED HOSTEL COMPLAINT MANAGEMENT
+          </div>
+          
+          <h1 class="hero-headline">
+            Hostel life,<br>
+            <span class="hero-highlight">sorted.</span>
+          </h1>
+
+          <div class="hero-subhead">
+            Report it. Track it. Get it sorted.
+          </div>
+
+          <p class="hero-description">
+            A simple and smart platform to report hostel issues, track every update, and help make campus living better for everyone.
+          </p>
+
+          <div class="hero-cta-group">
+            <button class="btn btn-primary" data-view-nav="newComplaint" style="font-size: 1.05rem; padding: 0.8rem 1.6rem;">
+              Report an Issue →
+            </button>
+            <a href="#how-it-works" class="btn btn-secondary" style="font-size: 1.05rem; padding: 0.8rem 1.6rem;">
+              See How It Works
+            </a>
+          </div>
+
+          <!-- Live Interactive Preview of Student Dashboard -->
+          <div class="preview-window">
+            <div class="preview-topbar">
+              <div class="window-dots">
+                <div class="dot" style="background: #FF5F56;"></div>
+                <div class="dot" style="background: #FFBD2E;"></div>
+                <div class="dot" style="background: #27C93F;"></div>
+              </div>
+              <span style="font-size: 0.8rem; font-weight: 600; color: var(--color-text-secondary);">Hostlur Live Campus Feed — Block B & C</span>
+              <span class="badge badge-ai" style="font-size: 0.72rem;">Gemma 4 AI Active</span>
+            </div>
+            <div class="preview-content">
+              <div id="landing-preview-cards" class="complaints-grid">
+                <!-- Filled dynamically by app.js -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section id="features" class="canvas-container" style="padding-top: 4rem;">
+        <div class="section-header">
+          <h2 class="section-title">Why Students & Wardens Love Hostlur</h2>
+          <p class="section-subtitle">Eliminating WhatsApp chaos and lost paper registers forever.</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon-box">⚡</div>
+            <h3>1. Report in Seconds</h3>
+            <p>Submit hostel complaints through a clean, intuitive form in under 60 seconds. No waiting in office queues.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box">📍</div>
+            <h3>2. Track Every Update</h3>
+            <p>Live status transparency from Submitted to In-Progress and Resolved. See who is working on your issue.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box" style="background: #F3EFFC;">🧠</div>
+            <h3>3. AI-Powered Insights</h3>
+            <p>Google's Gemma model automatically categorizes complaints, evaluates urgency, and generates crisp warden summaries.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-box">🛡️</div>
+            <h3>4. Faster Resolution</h3>
+            <p>Helps hostel wardens detect recurring systemic issues across wings, prioritize hazards, and allocate technicians.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- How It Works Section -->
+      <section id="how-it-works" class="canvas-container" style="padding-top: 2rem;">
+        <div class="section-header">
+          <h2 class="section-title">How It Works</h2>
+          <p class="section-subtitle">Three straightforward steps to a cleaner, safer hostel.</p>
+        </div>
+
+        <div class="steps-container">
+          <div class="step-card">
+            <div class="step-num">01</div>
+            <h3>Step 1: Report the problem</h3>
+            <p>Describe your Wi-Fi, electricity, plumbing, or cleanliness issue in plain words with your block and room number.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">02</div>
+            <h3>Step 2: Hostlur organizes</h3>
+            <p>Gemma AI structure-checks the report, highlights urgent safety flags, and matches with potential related reports.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-num">03</div>
+            <h3>Step 3: Track until resolution</h3>
+            <p>The warden acknowledges the ticket, technician dispatches, and you receive instant status confirmation.</p>
+          </div>
+        </div>
+
+        <!-- Callout Banner -->
+        <div class="cta-banner">
+          <h2 style="font-size: 2.2rem; margin-bottom: 0.6rem;">Ready to experience hassle-free hostel living?</h2>
+          <p style="color: var(--color-text-secondary); max-width: 500px; margin: 0 auto 1.8rem;">
+            Join your fellow residents in keeping our campus infrastructure spotless.
+          </p>
+          <button class="btn btn-primary" data-view-nav="newComplaint" style="font-size: 1.05rem; padding: 0.8rem 1.8rem;">
+            Report an Issue Now →
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= VIEW 2: STUDENT DASHBOARD ================= -->
+    <div id="view-student" style="display: none;">
+      <div class="canvas-container">
+        <!-- Greeting Header -->
+        <div class="dashboard-header">
+          <div class="greeting-text">
+            <h1>Hey, roomie! 👋</h1>
+            <p>Here’s what’s happening in your hostel today. Logged in as <strong id="student-user-name">Aarav Sharma</strong> (<span id="student-user-block">Block B</span>).</p>
+          </div>
+          <button class="btn btn-primary" data-view-nav="newComplaint">
+            + Report New Issue
+          </button>
+        </div>
+
+        <!-- Metrics Row -->
+        <div class="metrics-row">
+          <div class="metric-card">
+            <span class="metric-label">My Total Reports</span>
+            <span class="metric-val" id="stat-student-total">0</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Submitted</span>
+            <span class="metric-val" id="stat-student-submitted">0</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">In Progress</span>
+            <span class="metric-val" id="stat-student-progress">0</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Resolved</span>
+            <span class="metric-val" id="stat-student-resolved">0</span>
+          </div>
+        </div>
+
+        <!-- Toolbar / Search / Filter -->
+        <div class="toolbar-card">
+          <div class="search-box">
+            <span>🔍</span>
+            <input type="text" id="student-search-input" placeholder="Search by title, room, or keywords...">
+          </div>
+
+          <div class="filter-group">
+            <select id="student-filter-category" class="filter-select">
+              <option value="">All Categories</option>
+              <option value="Wi-Fi and Internet">Wi-Fi and Internet</option>
+              <option value="Water Supply">Water Supply</option>
+              <option value="Electricity">Electricity</option>
+              <option value="Food Quality">Food Quality</option>
+              <option value="Cleanliness">Cleanliness</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Safety">Safety</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <select id="student-filter-status" class="filter-select">
+              <option value="">All Statuses</option>
+              <option value="Submitted">Submitted</option>
+              <option value="Under Review">Under Review</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+            </select>
+
+            <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.88rem; font-weight: 600; cursor: pointer;">
+              <input type="checkbox" id="student-filter-mine">
+              My Complaints Only
+            </label>
+          </div>
+        </div>
+
+        <!-- Complaints Stream -->
+        <div id="student-complaints-list" class="complaints-grid">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 3: COMPLAINT SUBMISSION ================= -->
+    <div id="view-new-complaint" style="display: none;">
+      <div class="canvas-container">
+        <div style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.8rem;">
+          <button class="btn btn-secondary btn-sm" data-view-nav="student">← Back to Dashboard</button>
+          <span style="font-size: 0.88rem; color: var(--color-text-secondary);">Submit a verified hostel complaint</span>
+        </div>
+
+        <div class="form-card">
+          <div style="margin-bottom: 1.5rem;">
+            <h2 style="font-size: 1.8rem; margin-bottom: 0.2rem;">Report a Hostel Issue</h2>
+            <p style="color: var(--color-text-secondary); font-size: 0.95rem;">
+              Fill in the details below. Our Gemma AI model will automatically analyze and prioritize your request.
+            </p>
+          </div>
+
+          <form id="complaint-form">
+            <div class="form-grid">
+              <div class="form-group form-full">
+                <label for="form-title">Complaint Title *</label>
+                <input type="text" id="form-title" class="form-input" placeholder="e.g. Wi-Fi router keeps disconnecting on 3rd floor" required>
+              </div>
+
+              <div class="form-group">
+                <label for="form-category">Category *</label>
+                <select id="form-category" class="form-select" required>
+                  <option value="">Select category...</option>
+                  <option value="Wi-Fi and Internet">Wi-Fi and Internet</option>
+                  <option value="Water Supply">Water Supply</option>
+                  <option value="Electricity">Electricity</option>
+                  <option value="Food Quality">Food Quality</option>
+                  <option value="Cleanliness">Cleanliness</option>
+                  <option value="Maintenance">Maintenance</option>
+                  <option value="Safety">Safety</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="form-block">Hostel Block *</label>
+                <select id="form-block" class="form-select" required>
+                  <option value="">Select block...</option>
+                  <option value="Block A (Boys)">Block A (Boys)</option>
+                  <option value="Block B (Boys)">Block B (Boys)</option>
+                  <option value="Block C (Girls)">Block C (Girls)</option>
+                  <option value="Block D (Girls)">Block D (Girls)</option>
+                  <option value="PG Block">PG Block</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="form-location">Specific Location *</label>
+                <input type="text" id="form-location" class="form-input" placeholder="e.g. 3rd Floor, Room 302 or Common Washroom" required>
+              </div>
+
+              <div class="form-group">
+                <label for="form-duration">Duration of Issue (Optional)</label>
+                <input type="text" id="form-duration" class="form-input" placeholder="e.g. Since yesterday morning, 2 days">
+              </div>
+
+              <div class="form-group form-full">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.2rem;">
+                  <label for="form-description">Description of the Problem *</label>
+                  <button type="button" id="form-ai-btn" class="btn btn-ai btn-sm">
+                    <span>✨ Auto-Analyze with Gemma AI</span>
+                  </button>
+                </div>
+                <textarea id="form-description" class="form-textarea" placeholder="Describe the issue in detail. If there are visible hazards (sparks, leaks, smoke), mention them clearly." required></textarea>
+              </div>
+            </div>
+
+            <!-- Gemma AI Real-time Preview Box -->
+            <div id="form-ai-preview" class="ai-preview-box">
+              <div class="ai-preview-header">
+                <span class="ai-pill-label">🧠 Gemma 4 Analysis Preview</span>
+                <span style="font-size: 0.78rem; color: #5B488C;">Server-side verified</span>
+              </div>
+              <div style="font-size: 0.9rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                <div><strong>Suggested Category:</strong> <span id="form-ai-cat-suggest">-</span></div>
+                <div><strong>Suggested Priority:</strong> <span id="form-ai-prio-suggest">-</span></div>
+                <div><strong>Factual Summary:</strong> <span id="form-ai-summary-suggest">-</span></div>
+                <div id="form-ai-hazard-alert" style="display: none; background: #FFD4CE; padding: 0.4rem 0.6rem; border-radius: 6px; color: #8A0B05; font-weight: 700; margin-top: 0.3rem;">
+                  🚨 Safety Hazard Detected: <span id="form-ai-hazard-reason"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Duplicate / Related Issues Warning Box -->
+            <div id="form-related-warning" class="related-warning-box">
+              <div style="font-size: 0.88rem; font-weight: 700; color: #7A5300; display: flex; align-items: center; gap: 0.4rem;">
+                ℹ️ Similar Issues Reported Nearby
+              </div>
+              <p style="font-size: 0.82rem; color: var(--color-text-secondary); margin-top: 0.2rem;">
+                We found open complaints in your block that might match yours. You can support them directly to boost urgency instead of creating a duplicate!
+              </p>
+              <div id="form-related-list"></div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+              <button type="button" class="btn btn-secondary" data-view-nav="student">Cancel</button>
+              <button type="submit" id="form-submit-btn" class="btn btn-primary" style="padding: 0.75rem 1.8rem;">
+                Submit Complaint →
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 4: WARDEN DASHBOARD ================= -->
+    <div id="view-warden" style="display: none;">
+      <div class="canvas-container">
+        <!-- Warden Header -->
+        <div class="dashboard-header">
+          <div class="greeting-text">
+            <h1>Hostel Warden Portal 🛡️</h1>
+            <p>Campus-wide complaint triage, hazard management, and status updates.</p>
+          </div>
+          <div style="display: flex; gap: 0.6rem;">
+            <span class="badge badge-ai" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">Gemma 4 Triage Engine</span>
+          </div>
+        </div>
+
+        <!-- Warden Metrics -->
+        <div class="metrics-row">
+          <div class="metric-card">
+            <span class="metric-label">Total Open Issues</span>
+            <span class="metric-val" id="stat-warden-open">0</span>
+          </div>
+          <div class="metric-card urgent">
+            <span class="metric-label">🚨 Urgent / Safety Hazards</span>
+            <span class="metric-val" id="stat-warden-urgent" style="color: #900C05;">0</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">In Progress</span>
+            <span class="metric-val" id="stat-warden-progress">0</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Resolved</span>
+            <span class="metric-val" id="stat-warden-resolved">0</span>
+          </div>
+        </div>
+
+        <!-- Warden Search and Multi-Filters -->
+        <div class="toolbar-card">
+          <div class="search-box">
+            <span>🔍</span>
+            <input type="text" id="warden-search-input" placeholder="Search complaints by room, resident, or keywords...">
+          </div>
+
+          <div class="filter-group">
+            <select id="warden-filter-block" class="filter-select">
+              <option value="">All Hostel Blocks</option>
+              <option value="Block A (Boys)">Block A (Boys)</option>
+              <option value="Block B (Boys)">Block B (Boys)</option>
+              <option value="Block C (Girls)">Block C (Girls)</option>
+              <option value="Block D (Girls)">Block D (Girls)</option>
+              <option value="PG Block">PG Block</option>
+            </select>
+
+            <select id="warden-filter-category" class="filter-select">
+              <option value="">All Categories</option>
+              <option value="Wi-Fi and Internet">Wi-Fi and Internet</option>
+              <option value="Water Supply">Water Supply</option>
+              <option value="Electricity">Electricity</option>
+              <option value="Food Quality">Food Quality</option>
+              <option value="Cleanliness">Cleanliness</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Safety">Safety</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <select id="warden-filter-status" class="filter-select">
+              <option value="">All Statuses</option>
+              <option value="Submitted">Submitted</option>
+              <option value="Under Review">Under Review</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Resolved">Resolved</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Warden Complaints Feed -->
+        <div id="warden-complaints-list" class="complaints-grid">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= COMPLAINT DETAIL & WARDEN ACTION MODAL ================= -->
+  <div id="complaint-detail-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <span id="modal-complaint-id" style="font-family: monospace; font-size: 0.8rem; font-weight: 700; color: var(--color-text-secondary);">CMP-ID</span>
+          <h2 id="modal-complaint-title" style="font-size: 1.25rem;">Complaint Title</h2>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="closeComplaintModal()">✕ Close</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Badges Bar -->
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <span id="modal-complaint-status-badge" class="badge badge-submitted">Status</span>
+          <span id="modal-complaint-priority-badge" class="badge badge-medium">Priority</span>
+        </div>
+
+        <!-- Location & Resident Meta -->
+        <div style="background: var(--color-surface); padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.3rem;">
+          <div><strong>Location:</strong> <span id="modal-complaint-location">-</span></div>
+          <div><strong>Reported By:</strong> <span id="modal-complaint-author">-</span></div>
+          <div><strong>Submitted:</strong> <span id="modal-complaint-time">-</span></div>
+        </div>
+
+        <!-- Full Complaint Text -->
+        <div>
+          <h4 style="font-size: 0.92rem; margin-bottom: 0.4rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em;">Resident Description</h4>
+          <p id="modal-complaint-desc" style="font-size: 0.95rem; line-height: 1.6; background: #FFFFFF; border: 1px solid var(--color-border); padding: 0.8rem 1rem; border-radius: var(--radius-md);"></p>
+        </div>
+
+        <!-- Gemma AI Recommendation Analysis Box -->
+        <div id="modal-ai-box" style="background: #F8F5FE; border: 1px solid #CDBDF5; border-radius: var(--radius-md); padding: 1rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem;">
+            <span class="badge badge-ai">🧠 Gemma AI Model Recommendation</span>
+            <span style="font-size: 0.75rem; color: #4B3388;">API: gemma-4-26b-a4b-it</span>
+          </div>
+          <div style="font-size: 0.88rem; display: flex; flex-direction: column; gap: 0.35rem;">
+            <div><strong>Factual Summary:</strong> <span id="modal-ai-summary"></span></div>
+            <div><strong>Suggested Category:</strong> <span id="modal-ai-category"></span></div>
+            <div><strong>Suggested Priority:</strong> <span id="modal-ai-priority"></span></div>
+            <div id="modal-ai-missing-wrap" style="display: none; margin-top: 0.2rem;">
+              <strong>Missing Information to follow up on:</strong>
+              <ul id="modal-ai-missing" style="padding-left: 1.2rem; margin-top: 0.2rem;"></ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status History Timeline -->
+        <div>
+          <h4 style="font-size: 0.92rem; margin-bottom: 0.6rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em;">Audit & Resolution History</h4>
+          <div id="modal-timeline" class="timeline-list">
+            <!-- Timeline items rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Warden Status Update Controls -->
+        <div id="modal-warden-actions" style="display: none; background: #FFFDF0; border: 1px solid #F5CB5C; border-radius: var(--radius-md); padding: 1rem;">
+          <h4 style="font-size: 0.95rem; margin-bottom: 0.6rem; color: #6D4C00;">🛡️ Warden Status Management</h4>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 0.8rem;">
+            <div class="form-group">
+              <label for="modal-status-select" style="font-size: 0.82rem;">Update Status</label>
+              <select id="modal-status-select" class="form-select">
+                <option value="Submitted">Submitted</option>
+                <option value="Under Review">Under Review</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="modal-priority-select" style="font-size: 0.82rem;">Confirmed Priority</label>
+              <select id="modal-priority-select" class="form-select">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Urgent">Urgent</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0.8rem;">
+            <label for="modal-status-note" style="font-size: 0.82rem;">Status Note / Action Taken</label>
+            <input type="text" id="modal-status-note" class="form-input" placeholder="e.g. Electrician dispatched to 2nd floor switchboard.">
+          </div>
+
+          <button type="button" id="modal-save-status-btn" class="btn btn-primary" style="width: 100%;">
+            Save Status Update
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeComplaintModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <span style="font-weight: 800; color: var(--color-text);">Hostlur</span>
+        <span>— Hostel Life, Simplified.</span>
+      </div>
+      <div style="font-size: 0.82rem;">
+        College Hackathon Demo • Powered by Google Gemma 4 (Google AI Studio API)
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
