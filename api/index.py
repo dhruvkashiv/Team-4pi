@@ -70,8 +70,16 @@ class VercelASGIAdapter:
                 else:
                     path = "/api/health"
 
-            # If path lacks /api prefix (and isn't static/upload), normalize to /api/...
-            if not path.startswith("/api") and not path.startswith("/static"):
+            # Keep frontend paths available when Vercel routes them through this function.
+            is_frontend_path = (
+                path == "/"
+                or path.startswith(("/static/", "/css/", "/js/", "/uploads/"))
+            )
+            if path.startswith("/uploads/"):
+                path = path.replace("/uploads/", "/static/uploads/", 1)
+
+            # If path lacks /api prefix and is not a frontend path, normalize to /api/...
+            if not path.startswith("/api") and not is_frontend_path:
                 path = f"/api{path}" if path.startswith("/") else f"/api/{path}"
 
             scope["path"] = path
