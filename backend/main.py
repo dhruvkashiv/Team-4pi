@@ -63,6 +63,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Initialize database schema and seed users eagerly on module import
+try:
+    init_db()
+except Exception:
+    pass
+
 @app.on_event("startup")
 def startup_event():
     init_db()
@@ -70,12 +76,27 @@ def startup_event():
 # --- HEALTH & METADATA ---
 @app.get("/api/health")
 def health_check():
+    user_count = 0
+    complaint_count = 0
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM users")
+        user_count = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM complaints")
+        complaint_count = cursor.fetchone()[0]
+        conn.close()
+    except Exception:
+        pass
+
     return {
         "status": "healthy",
         "service": "Hostlur",
         "version": "2.0.0",
         "ai_model": GEMMA_MODEL,
         "database": "SQLite (WAL)",
+        "users_count": user_count,
+        "complaints_count": complaint_count,
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
 

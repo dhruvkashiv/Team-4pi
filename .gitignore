@@ -48,3 +48,7 @@ Thumbs.db
 frontend/uploads/*
 !frontend/uploads/img_e8399cc58c.jpg
 
+
+# Vercel
+.vercel/
+
